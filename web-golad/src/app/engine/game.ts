@@ -1,7 +1,7 @@
 import {
     Engine, Scene, Light,
     Vector3, HemisphericLight, MeshBuilder,
-    ArcRotateCamera, StandardMaterial, Texture,
+    FreeCamera, StandardMaterial, Texture,
     Color3
 } from 'babylonjs';
     
@@ -9,7 +9,7 @@ export class Game {
     private canvas: HTMLCanvasElement;
     private engine: Engine;
     private scene: Scene;
-    private camera: ArcRotateCamera;
+    private camera: FreeCamera;
     private light: Light;
     
     constructor(canvasElement: string) {
@@ -29,73 +29,96 @@ export class Game {
         this.scene = new Scene(this.engine);
     
         // Create the camera
-        this.camera = new ArcRotateCamera('Camera', -Math.PI / 2, Math.PI / 2, 5, Vector3.Zero(), this.scene);
-        this.camera.position = new Vector3(0, 0, 0);
+        //this.camera = new ArcRotateCamera('Camera', -Math.PI / 2, Math.PI / 2, 5, Vector3.Zero(), this.scene);
+        const sizeBoard = 20 * 1 + 20 * 0.1
+        this.camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(sizeBoard/2.0, 20, sizeBoard/2.0), this.scene);
+        this.camera.setTarget( new BABYLON.Vector3(sizeBoard/2.0, 0.0, sizeBoard/2.0));
+        this.camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;        
+        this.camera.orthoTop = 15.0;
+        this.camera.orthoBottom = -15.0;
+        this.camera.orthoLeft = 15.0;
+        this.camera.orthoRight = -15.0;        
         this.camera.attachControl(this.canvas, false);
     
         // Create a global light
         this.light = new HemisphericLight('skyLight', new Vector3(1, 1, 0), this.scene);
     
-        // Add a sphere inside the scene
-        const sphere = MeshBuilder.CreateSphere('sphere', { segments: 16, diameter: 1 }, this.scene);
-        sphere.position.y = 1;
-        
-        const subdivisions = {'w': 20, 'h': 20};
-        const precision = {'w': 1, 'h': 1};
-        const options = {
-            'xmin': 0.0,
-            'xmax': 200.0,
-            'zmin': 0.0,
-            'zmax': 200.0,
-            'subdivisions': subdivisions,
-            'precision': precision,
-            'updtable': true
-        }        
-        let tiledGround = MeshBuilder.CreateTiledGround('board', options, this.scene);
-        
-        // Create materials for the board
-        const redMaterial = new BABYLON.StandardMaterial("Red", this.scene);
-        redMaterial.diffuseColor = new BABYLON.Color3(1, 0, 0);
-        
-        const blueMaterial = new BABYLON.StandardMaterial("Blue", this.scene);
-        blueMaterial.diffuseColor = new BABYLON.Color3(0, 0, 1);
-
-        const blackMaterial = new BABYLON.StandardMaterial("Black", this.scene);
-        blackMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-
-        var multimat = new BABYLON.MultiMaterial("multi", this.scene);
-        multimat.subMaterials.push(redMaterial);
-        multimat.subMaterials.push(blackMaterial);
-        multimat.subMaterials.push(blueMaterial);
-
-        // Apply the mutlimaterial
-        tiledGround.material = multimat;
-        const verticesCount = tiledGround.getTotalVertices();
-        const tileIndicesLength = tiledGround.getIndices().length / (subdivisions.w * subdivisions.h);
-
-        tiledGround.subMeshes = [];
-        var base = 0;
-        for (var row = 0; row < subdivisions.h; row++) {
-            for (var col = 0; col < subdivisions.w; col++) {
-                tiledGround.subMeshes.push(new BABYLON.SubMesh(row%2 ^ col%2, 0, verticesCount, base, tileIndicesLength, tiledGround));
-                base += tileIndicesLength;
-            }
-        }
-
-        // Add a skybox for the environment
-        const skybox = MeshBuilder.CreateBox('skyBox', { size: 1000.0 }, this.scene);
-        const skyboxMaterial = new StandardMaterial('skyBox', this.scene);
-        skyboxMaterial.backFaceCulling = false;
-    
-        // Create the texture for the environment
-        const fixedTexture = new Texture('/assets/saint_jean_luz.jpg', this.scene);
-        skyboxMaterial.reflectionTexture = fixedTexture; // videoTexture;
-        skyboxMaterial.reflectionTexture.coordinatesMode = Texture.FIXED_EQUIRECTANGULAR_MODE;
-        skyboxMaterial.diffuseColor = new Color3(0, 0, 0);
-        skyboxMaterial.specularColor = new Color3(0, 0, 0);
-        skybox.material = skyboxMaterial;
+        this.displayBoard();
+        this.displayTiles();
     }
     
+    displayBoard() {
+        const name = 'board';
+        const size = 250;
+        const options = {
+            'width': size,
+            'depth': size,
+            'height': 0.5
+        } 
+        const board = MeshBuilder.CreateBox(name, options, this.scene);
+        board.position.x = -10.0;
+        board.position.y = -1.0;
+        board.position.z = -10.0;
+
+        const blackMaterial = new BABYLON.StandardMaterial("DarkGrey", this.scene);
+        blackMaterial.diffuseColor = new BABYLON.Color3(0.0, 0.0, 0.0);
+        board.material = blackMaterial;
+    }
+
+    displayTiles() {
+        const gap = 0.1;
+        const start = {
+            'x': 0.0,
+            'y': 0.0,
+            'z': 0.0
+        };
+        const subdivisions = 20;
+        const size = 1.0;   
+        const options = {
+            'width': size,
+            'depth': size,
+            'height': 0.5
+        }       
+        
+        let neighborX = null;
+        let neighborZ = null;
+
+        const darkGreyMaterial = new BABYLON.StandardMaterial("DarkGrey", this.scene);
+        darkGreyMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.8);
+
+        for(let i = 0; i < subdivisions; i++) {
+
+            const name = 'tile_' + (i+1);
+            const tile = MeshBuilder.CreateBox(name, options, this.scene);
+            tile.material = darkGreyMaterial;
+
+            if (neighborX) {
+                tile.position.x = neighborX.position.x + gap + size;
+                tile.position.y = neighborX.position.y;
+                tile.position.z = neighborX.position.z;
+            }
+            else {
+                tile.position.x = start.x;
+                tile.position.y = start.y;
+                tile.position.z = start.z;                
+            }
+            neighborX = tile;
+            neighborZ = tile
+
+            for(let j = 0; j < subdivisions-1; j++) {
+                const name = 'tile_' + (i+1+(subdivisions*(j+1)));
+                const tile = MeshBuilder.CreateBox(name, options, this.scene);
+                tile.material = darkGreyMaterial;
+                if (neighborZ) {
+                    tile.position.x = neighborZ.position.x;
+                    tile.position.y = neighborZ.position.y;
+                    tile.position.z = neighborZ.position.z + gap + size;
+                }
+                neighborZ = tile;                                                                            
+            }
+        }        
+    }
+
     run(): void {
         // Rendering loop
         this.engine.runRenderLoop(() => {
