@@ -42,7 +42,9 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   }
 
   onClick(event) {
-    const pickResult = this.game.onClickEvent(event.x, event.y);
+    const correctedX = event.x - event.target.offsetLeft;
+    const correctedY = event.y - event.target.offsetTop;
+    const pickResult = this.game.onClickEvent(correctedX, correctedY);
     if (pickResult.hit) {
       this.pickObject.emit(this.generateCellFromMesh(pickResult));
     }

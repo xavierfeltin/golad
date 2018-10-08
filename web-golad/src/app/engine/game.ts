@@ -15,30 +15,30 @@ export class Game {
     private boardSize: number = 20;
     
     public static EMPTY: number = 0;
-    public static RED_LVING: number = 1;
-    public static RED_BORN: number = 2;
-    public static RED_DYING: number = 3;
-    public static BLUE_LVING: number = 4;
-    public static BLUE_BORN: number = 5;
-    public static BLUE_DYING: number = 6;
-    public static RED_PLAYER = 0;
-    public static BLUE_PLAYER = 1;
+    public static BLUE_LVING: number = 1;
+    public static BLUE_BORN: number = 2;
+    public static BLUE_DYING: number = 3;
+    public static RED_LVING: number = 4;
+    public static RED_BORN: number = 5;
+    public static RED_DYING: number = 6;
+    public static RED_PLAYER = 1;
+    public static BLUE_PLAYER = 0;
 
     CELL_SIZE = 10.0;
     BOARD_SIZE = 20; //replace later with player board selection
 
     constructor(canvasElement: string) {
         this.canvas = <HTMLCanvasElement>document.getElementById(canvasElement);
+        this.canvas.height = 500;
+        this.canvas.width = 500;
      
         // Attach the engine with the canvas
-        this.engine = new Engine(this.canvas, true);
-    
+        this.engine = new Engine(this.canvas, true, {stencil: true}, true);
+        
         //In case of redimensioning the browser's window
-        /*
         window.addEventListener('resize', () => {
             this.engine.resize();
-        });
-        */
+        });        
     }
     
     createScene(): void {
@@ -53,6 +53,10 @@ export class Game {
     }
     
     createBoard(size: number) {
+        const board = this.scene.getMeshByName('board');
+        if (board) {
+            this.scene.removeMesh(board, true);
+        }
         this.boardSize = size;
         this.configureCamera();
         this.displayBoardMultiMap();
@@ -60,7 +64,7 @@ export class Game {
 
     configureCamera() {
         // Create the camera
-        const sizeBoard = this.BOARD_SIZE * this.CELL_SIZE;
+        const sizeBoard = this.boardSize * this.CELL_SIZE;
         const halfSizeBoard = sizeBoard/2.0;
         this.camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(halfSizeBoard, this.BOARD_SIZE, -halfSizeBoard), this.scene);
         this.camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;        
@@ -115,6 +119,9 @@ export class Game {
         const board = this.scene.getMeshByName('board');
         for(const cell of cells) {
             switch(cell.state) {
+                case(Game.BLUE_BORN): {board.subMeshes[cell.id].materialIndex = Game.BLUE_BORN; break;}
+                case(Game.BLUE_DYING): {board.subMeshes[cell.id].materialIndex = Game.BLUE_DYING; break;}
+                case(Game.BLUE_LVING): {board.subMeshes[cell.id].materialIndex = Game.BLUE_LVING; break;}
                 case(Game.RED_BORN): {board.subMeshes[cell.id].materialIndex = Game.RED_BORN; break;}
                 case(Game.RED_DYING): {board.subMeshes[cell.id].materialIndex = Game.RED_DYING; break;}
                 case(Game.RED_LVING): {board.subMeshes[cell.id].materialIndex = Game.RED_LVING; break;}
@@ -135,21 +142,8 @@ export class Game {
     }
     
     onClickEvent(x: number, y: number) {
-        //const redMaterial = new BABYLON.StandardMaterial("Red", this.scene);
-        //redMaterial.diffuseColor = new BABYLON.Color3(0.9, 0.0, 0.0);
-
+        console.log(x + ', ' + y);
         const pickResult = this.scene.pick(x,y);
-        /*
-        if (pickResult.hit) {
-            if (pickResult.pickedMesh.subMeshes[pickResult.subMeshId].materialIndex == Game.EMPTY) {
-                pickResult.pickedMesh.subMeshes[pickResult.subMeshId].materialIndex = Game.BLUE_LVING;   
-            }
-            else {
-                pickResult.pickedMesh.subMeshes[pickResult.subMeshId].materialIndex = Game.EMPTY;
-            }
-        }
-        */
-
         return pickResult;
     }
 
@@ -223,7 +217,7 @@ export class Game {
         this.engine.runRenderLoop(() => {
             //this.renderPlayerCells(Game.RED_PLAYER, [2, 5, 10, 11, 34]);
             //this.renderPlayerCells(Game.BLUE_PLAYER, [236, 256, 276, 257, 258, 259]);
-            this.engine.resize();
+            //this.engine.resize();
             this.scene.render();
         });
     }

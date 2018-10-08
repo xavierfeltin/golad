@@ -63,7 +63,10 @@ export class BoardState {
         ctx.patchState({
             size: board.size,
             cells: board.cells.map(boardCell => {
-                boardCell.player = 1 - boardCell.player; //inverse player for now
+                if (boardCell.state != Game.EMPTY){
+                    boardCell.player = 1 - boardCell.player; //inverse player for now
+                    boardCell.state = 6 - boardCell.state + 1;
+                }
                 return boardCell;
             })
         })

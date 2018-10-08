@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngxs/store';
-import { CreateBoard } from '../../actions/board.action';
+import { CreateBoard, ApplyLife } from '../../actions/board.action';
 
 @Component({
   selector: 'app-game-state',
@@ -16,5 +16,9 @@ export class GameStateComponent implements OnInit {
 
   createGame() {
     this.store.dispatch(new CreateBoard(20));
+  }
+
+  applyLife() {
+    this.store.dispatch(new ApplyLife());
   }
 }
