@@ -1,4 +1,5 @@
 import { Component, OnInit, AfterViewInit, Output, EventEmitter, Input } from '@angular/core';
+import { GameLogic } from '../../engine/logic';
 import { Game } from '../../engine/game';
 import { Cell } from '../../models/cell.model';
 import { AbstractMesh, PickingInfo } from 'babylonjs';
@@ -55,19 +56,19 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     const mesh = pick.pickedMesh;
     const idMaterial = parseInt(mesh.material.id);
     switch(idMaterial) {
-      case Game.EMPTY: {state = Game.RED_LVING; break;}
-      case Game.RED_LVING: {state = Game.EMPTY; break;}
-      case Game.RED_DYING: {state = Game.EMPTY; break;}
-      case Game.RED_BORN: {state = Game.EMPTY; break;}
+      case GameLogic.EMPTY: {state = GameLogic.RED_LIVING; break;}
+      case GameLogic.RED_LIVING: {state = GameLogic.EMPTY; break;}
+      case GameLogic.RED_DYING: {state = GameLogic.EMPTY; break;}
+      case GameLogic.RED_BORN: {state = GameLogic.EMPTY; break;}
       default: {
-        state = Game.EMPTY;
+        state = GameLogic.EMPTY;
         break; 
       }
     }
     
     const cell: Cell = {
       id: pick.subMeshId,
-      player: Game.RED_PLAYER,
+      player: GameLogic.RED_PLAYER,
       state: state
     };
 

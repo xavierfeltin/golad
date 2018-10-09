@@ -3,9 +3,9 @@ import {
     Vector3, HemisphericLight,
     FreeCamera, Texture
 } from 'babylonjs';
-import {Player} from './logic';
 import {Cell} from '../models/cell.model';
-    
+import { GameLogic } from './logic';
+
 export class Game {
     private canvas: HTMLCanvasElement;
     private engine: Engine;
@@ -14,16 +14,6 @@ export class Game {
     private light: Light;
     private boardSize: number = 20;
     
-    public static EMPTY: number = 0;
-    public static BLUE_LVING: number = 1;
-    public static BLUE_BORN: number = 2;
-    public static BLUE_DYING: number = 3;
-    public static RED_LVING: number = 4;
-    public static RED_BORN: number = 5;
-    public static RED_DYING: number = 6;
-    public static RED_PLAYER = 1;
-    public static BLUE_PLAYER = 0;
-
     CELL_SIZE = 10.0;
     BOARD_SIZE = 20; //replace later with player board selection
 
@@ -108,7 +98,7 @@ export class Game {
         let i = 0;
         for (let col = 0; col < subdivisions.w; col++) {
             for (let row = 0; row < subdivisions.h; row++) {
-                const subMesh = new BABYLON.SubMesh(Game.EMPTY, 0, verticesCount, base, tileIndicesLength, tiledGround);
+                const subMesh = new BABYLON.SubMesh(GameLogic.EMPTY, 0, verticesCount, base, tileIndicesLength, tiledGround);
                 base += tileIndicesLength;
                 i++;
             }
@@ -119,15 +109,15 @@ export class Game {
         const board = this.scene.getMeshByName('board');
         for(const cell of cells) {
             switch(cell.state) {
-                case(Game.BLUE_BORN): {board.subMeshes[cell.id].materialIndex = Game.BLUE_BORN; break;}
-                case(Game.BLUE_DYING): {board.subMeshes[cell.id].materialIndex = Game.BLUE_DYING; break;}
-                case(Game.BLUE_LVING): {board.subMeshes[cell.id].materialIndex = Game.BLUE_LVING; break;}
-                case(Game.RED_BORN): {board.subMeshes[cell.id].materialIndex = Game.RED_BORN; break;}
-                case(Game.RED_DYING): {board.subMeshes[cell.id].materialIndex = Game.RED_DYING; break;}
-                case(Game.RED_LVING): {board.subMeshes[cell.id].materialIndex = Game.RED_LVING; break;}
-                case(Game.EMPTY): {board.subMeshes[cell.id].materialIndex = Game.EMPTY; break;}
+                case(GameLogic.BLUE_BORN): {board.subMeshes[cell.id].materialIndex = GameLogic.BLUE_BORN; break;}
+                case(GameLogic.BLUE_DYING): {board.subMeshes[cell.id].materialIndex = GameLogic.BLUE_DYING; break;}
+                case(GameLogic.BLUE_LIVING): {board.subMeshes[cell.id].materialIndex = GameLogic.BLUE_LIVING; break;}
+                case(GameLogic.RED_BORN): {board.subMeshes[cell.id].materialIndex = GameLogic.RED_BORN; break;}
+                case(GameLogic.RED_DYING): {board.subMeshes[cell.id].materialIndex = GameLogic.RED_DYING; break;}
+                case(GameLogic.RED_LIVING): {board.subMeshes[cell.id].materialIndex = GameLogic.RED_LIVING; break;}
+                case(GameLogic.EMPTY): {board.subMeshes[cell.id].materialIndex = GameLogic.EMPTY; break;}
                 default: {
-                    board.subMeshes[cell.id].materialIndex = Game.EMPTY; break;
+                    board.subMeshes[cell.id].materialIndex = GameLogic.EMPTY; break;
                 }
             }            
         }
@@ -142,34 +132,36 @@ export class Game {
     }
     
     onClickEvent(x: number, y: number) {
-        console.log(x + ', ' + y);
         const pickResult = this.scene.pick(x,y);
         return pickResult;
     }
 
+    /*
     renderPlayerCells(idPlayer: number, cells: number[]) {
         let board = this.scene.getMeshByName('board');
         for (const cell of cells) {
             let idMaterial = 0;
             const neighbors = this.getNeighbors(cell, board);
-            if (Player.isCellConfortable(neighbors)) {
-                idMaterial = (idPlayer == Game.RED_PLAYER) ? Game.RED_LVING : Game.BLUE_LVING;
+            if (GameLogic.isCellConfortable(neighbors)) {
+                idMaterial = (idPlayer == GameLogic.RED_PLAYER) ? GameLogic.RED_LIVING : GameLogic.BLUE_LIVING;
             }
             else {
-                idMaterial = (idPlayer == Game.RED_PLAYER) ? Game.RED_DYING : Game.BLUE_DYING;
+                idMaterial = (idPlayer == GameLogic.RED_PLAYER) ? GameLogic.RED_DYING : GameLogic.BLUE_DYING;
             }
             board.subMeshes[cell].materialIndex = idMaterial; 
         }
     }
+    */
 
     /**
      * Return the number of cells living or dying around the current cell
      * @param id id of current cell
      * @param board board game containing all the cells
      */
+    /*
     getNeighbors(id: number, board: BABYLON.AbstractMesh): number {
         const coord = this.getMatrixPositionFromId(id);
-        const consideredCells = [Game.BLUE_LVING, Game.RED_LVING, Game.BLUE_DYING, Game.RED_DYING];
+        const consideredCells = [GameLogic.BLUE_LIVING, GameLogic.RED_LIVING, GameLogic.BLUE_DYING, GameLogic.RED_DYING];
         const neighborIndexes = [-1, 0, 1]; 
         let neighbors = 0;
         for(const i of neighborIndexes) {
@@ -188,15 +180,18 @@ export class Game {
         }
         return neighbors;
     }
+    */
 
     /**
      * Ids are generated from Top to Bottom and Left to Right
      * @param id id to convert
      * @return Array with two numbers representing [row, column] in a matrix space
      */
+    /*
     getMatrixPositionFromId(id: number) {
         return [id%this.BOARD_SIZE,Math.floor(id/this.BOARD_SIZE)];
     }
+    */
 
     /**
      * Match matrix coordinates into cells ids
@@ -204,9 +199,11 @@ export class Game {
      * @param colmn
      * @return id cell
      */
+    /*
     getIdFromMatrixPosition(row: number, column:number): number {
         return row + column * this.BOARD_SIZE ;
     }
+    */
 
     getScene() {
         return this.scene;

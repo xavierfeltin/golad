@@ -20,6 +20,6 @@ export class GameVisualizerComponent implements OnInit {
   ngOnInit() {}
 
   onPick(cell) {
-    this.store.dispatch(new AttributeCell(cell, 0)); //cell + player
+    this.store.dispatch(new AttributeCell(cell, 0)); //cell + player    
   }
 }

@@ -1,0 +1,6 @@
+<ng-container *ngIf="isEndOfTurn; else infoBlock">
+    <button class="ui_element" (click)="applyLife()"> Apply Life </button>    
+</ng-container>
+<ng-template #infoBlock>
+    <p> Turn: {{turn}} - Player: {{displayPlayer(player)}} is playing ! </p>
+</ng-template>

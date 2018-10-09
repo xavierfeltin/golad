@@ -1,8 +1,9 @@
-import { State, Action, StateContext, Selector } from '@ngxs/store';
+import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
 import { CreateBoard, AttributeCell, ApplyLife } from '../actions/board.action';
-import { BoardModel } from '../models/board.model';
 import { Cell } from '../models/cell.model';
-import { Game } from '../engine/game';
+import { GameLogic } from '../engine/logic';
+import { SetPlayerRemainingActions, NextTurn } from '../actions/turn.action';
+import { TurnState } from './turn.state';
 
 export class BoardStateModel {
     public size: number;
@@ -17,6 +18,8 @@ export class BoardStateModel {
     }
 })
 export class BoardState {
+
+    constructor(private store: Store) {}
 
     @Action(CreateBoard)
     createBoard(ctx: StateContext<BoardStateModel>, { size }: CreateBoard) {
@@ -34,27 +37,50 @@ export class BoardState {
         ctx.patchState({
             size: size,
             cells: [...cells]
-        })
+        });
     }
 
     @Action(AttributeCell)
     attributeCell(ctx: StateContext<BoardStateModel>, { cell, player }: AttributeCell) {
         const board = ctx.getState();
-        ctx.patchState({
-            size: board.size,
-            cells: board.cells.map(boardCell => {
-                if (boardCell.id === cell.id) {
-                    boardCell.player = player;
-                    if (boardCell.state == Game.RED_LVING) {
-                        boardCell.state = Game.EMPTY;
+        const playerRemainingActions = this.store.selectSnapshot(TurnState.getRemainingActions);
+        const currentPlayer = this.store.selectSnapshot(TurnState.getCurrentPlayer);
+        const neighborsCells = GameLogic.getNeighbors(cell.id, board.cells, board.size, true);
+
+        if (playerRemainingActions > 0) {
+            ctx.patchState({
+                size: board.size,
+                cells: board.cells.map(boardCell => {
+                    if (boardCell.id === cell.id) {
+                        boardCell.player = player;
+                        if (boardCell.state != GameLogic.EMPTY) {
+                            boardCell.state = GameLogic.EMPTY;
+                        }
+                        else {
+                            if (GameLogic.isCellConfortable(cell.id, board.cells, board.size)) {
+                                boardCell.state = (currentPlayer == GameLogic.BLUE_PLAYER) ? GameLogic.BLUE_LIVING : GameLogic.RED_LIVING;
+                            }
+                            else {
+                                boardCell.state = (currentPlayer == GameLogic.BLUE_PLAYER) ? GameLogic.BLUE_DYING : GameLogic.RED_DYING;
+                            }                            
+                        }
                     }
-                    else {
-                        boardCell.state = Game.RED_LVING;
+                    else if (neighborsCells.includes(boardCell.id)) {
+                        if (GameLogic.isCellConfortable(cell.id, board.cells, board.size)) {
+                            boardCell.state = (currentPlayer == GameLogic.BLUE_PLAYER) ? GameLogic.BLUE_BORN : GameLogic.RED_BORN;
+                        }
+                        else {
+                            boardCell.state = (currentPlayer == GameLogic.BLUE_PLAYER) ? GameLogic.BLUE_BORN : GameLogic.RED_BORN;
+                        }  
                     }
-                }
-                return boardCell;
-            })
-        });
+                    return boardCell;
+                })
+            });
+                    
+            ctx.dispatch(new SetPlayerRemainingActions(0));
+            //TODO: manage when player needs to delete two cells for creating new cell        
+        }
+        return board;        
     }
 
     @Action(ApplyLife)
@@ -63,12 +89,14 @@ export class BoardState {
         ctx.patchState({
             size: board.size,
             cells: board.cells.map(boardCell => {
-                if (boardCell.state != Game.EMPTY){
+                if (boardCell.state != GameLogic.EMPTY){
                     boardCell.player = 1 - boardCell.player; //inverse player for now
                     boardCell.state = 6 - boardCell.state + 1;
                 }
                 return boardCell;
             })
         })
+
+        ctx.dispatch(new NextTurn());
     }
 }

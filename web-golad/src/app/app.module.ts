@@ -9,6 +9,8 @@ import { DisplayCounterComponent } from './container/display-counter/display-cou
 import { GameVisualizerComponent } from './container/game-visualizer/game-visualizer.component';
 import { GameStateComponent } from './container/game-state/game-state.component';
 import { ViewerComponent } from './container/viewer/viewer.component';
+import { TurnInfoComponent } from './container/turn-info/turn-info.component';
+import { TurnState } from './state/turn.state';
 
 
 @NgModule({
@@ -18,13 +20,15 @@ import { ViewerComponent } from './container/viewer/viewer.component';
     EditCounterComponent,
     DisplayCounterComponent,
     GameVisualizerComponent,
-    GameStateComponent
+    GameStateComponent,
+    TurnInfoComponent
   ],
   imports: [
     BrowserModule,
     NgxsModule.forRoot([
       CounterState,
-      BoardState
+      BoardState,
+      TurnState
     ]),
   ],
   providers: [],
