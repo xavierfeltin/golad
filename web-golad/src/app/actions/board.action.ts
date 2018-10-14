@@ -7,7 +7,7 @@ export class CreateBoard {
 
 export class AttributeCell {
     static readonly type = '[BOARD] Add Cell';
-    constructor(public cell: Cell, public player: number) {}
+    constructor(public cell: Cell) {}
 }
 
 export class ApplyLife {

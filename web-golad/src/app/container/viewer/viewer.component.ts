@@ -33,10 +33,12 @@ export class ViewerComponent implements OnInit, AfterViewInit {
 
   ngOnChanges(changes) {    
     if (this.game) {
+
       if (changes.size) {
         this.game.createBoard(changes.size);
       }
-      else if (changes.board) {
+      
+      if (changes.board) {
         this.game.updateBoard(changes.board.currentValue);
       }
     } 
@@ -52,23 +54,25 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   }
 
   generateCellFromMesh(pick: PickingInfo): Cell {
-    let state = -1;
     const mesh = pick.pickedMesh;
-    const idMaterial = parseInt(mesh.material.id);
-    switch(idMaterial) {
-      case GameLogic.EMPTY: {state = GameLogic.RED_LIVING; break;}
-      case GameLogic.RED_LIVING: {state = GameLogic.EMPTY; break;}
-      case GameLogic.RED_DYING: {state = GameLogic.EMPTY; break;}
-      case GameLogic.RED_BORN: {state = GameLogic.EMPTY; break;}
-      default: {
-        state = GameLogic.EMPTY;
-        break; 
-      }
-    }
+    let state = mesh.subMeshes[pick.subMeshId].materialIndex;
     
+    const redCells = [Game.RED_LIVING, Game.RED_DYING];
+    const blueCells = [Game.BLUE_LIVING, Game.BLUE_DYING];
+
+    let player = GameLogic.NO_PLAYER;
+    if(redCells.includes(state)) {
+      player = GameLogic.RED_PLAYER;
+      state = (state == Game.RED_LIVING) ? GameLogic.LIVING : GameLogic.DYING;
+    }
+    else if (blueCells.includes(state)) {
+      player = GameLogic.BLUE_PLAYER;
+      state = (state == Game.RED_LIVING) ? GameLogic.LIVING : GameLogic.DYING;
+    }
+ 
     const cell: Cell = {
       id: pick.subMeshId,
-      player: GameLogic.RED_PLAYER,
+      player: player,
       state: state
     };
 

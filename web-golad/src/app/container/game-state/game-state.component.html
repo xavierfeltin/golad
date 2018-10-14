@@ -1,4 +1,4 @@
 <div>
   <button class="ui_element" (click)="createGame()"> Create New Game </button>  
 </div>
-<app-turn-info (nextTurn)="applyLife()" [turn]="turn$ | async" [player]="player$ | async"  [isEndOfTurn]="endTurn$ | async"></app-turn-info>
+<app-turn-info (nextTurn)="applyLife()" [turn]="turn$ | async" [player]="player$ | async"  [isEndPlayerTurn]="endTurn$ | async"></app-turn-info>

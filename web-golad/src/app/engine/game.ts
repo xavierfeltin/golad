@@ -13,6 +13,14 @@ export class Game {
     private camera: FreeCamera;
     private light: Light;
     private boardSize: number = 20;
+
+    public static EMPTY: number = 0;
+    public static BLUE_LIVING: number = 1;
+    public static BLUE_BORN: number = 2;
+    public static BLUE_DYING: number = 3;
+    public static RED_LIVING: number = 4;
+    public static RED_BORN: number = 5;
+    public static RED_DYING: number = 6;
     
     CELL_SIZE = 10.0;
     BOARD_SIZE = 20; //replace later with player board selection
@@ -109,16 +117,18 @@ export class Game {
         const board = this.scene.getMeshByName('board');
         for(const cell of cells) {
             switch(cell.state) {
-                case(GameLogic.BLUE_BORN): {board.subMeshes[cell.id].materialIndex = GameLogic.BLUE_BORN; break;}
-                case(GameLogic.BLUE_DYING): {board.subMeshes[cell.id].materialIndex = GameLogic.BLUE_DYING; break;}
-                case(GameLogic.BLUE_LIVING): {board.subMeshes[cell.id].materialIndex = GameLogic.BLUE_LIVING; break;}
-                case(GameLogic.RED_BORN): {board.subMeshes[cell.id].materialIndex = GameLogic.RED_BORN; break;}
-                case(GameLogic.RED_DYING): {board.subMeshes[cell.id].materialIndex = GameLogic.RED_DYING; break;}
-                case(GameLogic.RED_LIVING): {board.subMeshes[cell.id].materialIndex = GameLogic.RED_LIVING; break;}
-                case(GameLogic.EMPTY): {board.subMeshes[cell.id].materialIndex = GameLogic.EMPTY; break;}
+                case(GameLogic.BORN): {
+                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_BORN : Game.RED_BORN; 
+                    break;}
+                case(GameLogic.DYING): {
+                    board.subMeshes[cell.id].materialIndex =(cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_DYING : Game.RED_DYING; 
+                    break;}
+                case(GameLogic.LIVING): {
+                    board.subMeshes[cell.id].materialIndex =(cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_LIVING : Game.RED_LIVING; 
+                    break;}
                 default: {
-                    board.subMeshes[cell.id].materialIndex = GameLogic.EMPTY; break;
-                }
+                    board.subMeshes[cell.id].materialIndex = GameLogic.EMPTY; 
+                    break;}
             }            
         }
     }
@@ -136,75 +146,6 @@ export class Game {
         return pickResult;
     }
 
-    /*
-    renderPlayerCells(idPlayer: number, cells: number[]) {
-        let board = this.scene.getMeshByName('board');
-        for (const cell of cells) {
-            let idMaterial = 0;
-            const neighbors = this.getNeighbors(cell, board);
-            if (GameLogic.isCellConfortable(neighbors)) {
-                idMaterial = (idPlayer == GameLogic.RED_PLAYER) ? GameLogic.RED_LIVING : GameLogic.BLUE_LIVING;
-            }
-            else {
-                idMaterial = (idPlayer == GameLogic.RED_PLAYER) ? GameLogic.RED_DYING : GameLogic.BLUE_DYING;
-            }
-            board.subMeshes[cell].materialIndex = idMaterial; 
-        }
-    }
-    */
-
-    /**
-     * Return the number of cells living or dying around the current cell
-     * @param id id of current cell
-     * @param board board game containing all the cells
-     */
-    /*
-    getNeighbors(id: number, board: BABYLON.AbstractMesh): number {
-        const coord = this.getMatrixPositionFromId(id);
-        const consideredCells = [GameLogic.BLUE_LIVING, GameLogic.RED_LIVING, GameLogic.BLUE_DYING, GameLogic.RED_DYING];
-        const neighborIndexes = [-1, 0, 1]; 
-        let neighbors = 0;
-        for(const i of neighborIndexes) {
-            for(const j of neighborIndexes) {
-                if (i != 0 && j != 0) { //not cell itself
-                    const row = coord[0] + i;
-                    const column = coord[1] + j;
-                    if (row >= 0 && row < this.BOARD_SIZE
-                        && column >= 0 && column < this.BOARD_SIZE
-                        && consideredCells.includes(board.subMeshes[this.getIdFromMatrixPosition(row, column)].materialIndex)) {
-                        
-                        neighbors ++;                 
-                    }
-                }
-            }
-        }
-        return neighbors;
-    }
-    */
-
-    /**
-     * Ids are generated from Top to Bottom and Left to Right
-     * @param id id to convert
-     * @return Array with two numbers representing [row, column] in a matrix space
-     */
-    /*
-    getMatrixPositionFromId(id: number) {
-        return [id%this.BOARD_SIZE,Math.floor(id/this.BOARD_SIZE)];
-    }
-    */
-
-    /**
-     * Match matrix coordinates into cells ids
-     * @param row
-     * @param colmn
-     * @return id cell
-     */
-    /*
-    getIdFromMatrixPosition(row: number, column:number): number {
-        return row + column * this.BOARD_SIZE ;
-    }
-    */
-
     getScene() {
         return this.scene;
     }
@@ -212,9 +153,6 @@ export class Game {
     run(): void {
         // Rendering loop
         this.engine.runRenderLoop(() => {
-            //this.renderPlayerCells(Game.RED_PLAYER, [2, 5, 10, 11, 34]);
-            //this.renderPlayerCells(Game.BLUE_PLAYER, [236, 256, 276, 257, 258, 259]);
-            //this.engine.resize();
             this.scene.render();
         });
     }

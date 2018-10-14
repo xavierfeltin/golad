@@ -9,7 +9,7 @@ import { GameLogic } from '../../engine/logic';
 export class TurnInfoComponent implements OnInit {
   @Input() turn: number = 0;
   @Input() player: number = 0;
-  @Input() isEndOfTurn: boolean = false;
+  @Input() isEndPlayerTurn: boolean = false;
   
   @Output() nextTurn = new EventEmitter();
 
