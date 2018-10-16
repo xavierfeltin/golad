@@ -1,6 +1,8 @@
-import { State, Action, StateContext, Selector } from '@ngxs/store';
-import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn } from '../actions/turn.action';
+import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
+import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn, EndGame } from '../actions/turn.action';
 import { GameLogic } from '../engine/logic';
+import { SetScore } from '../actions/players.action';
+import { PlayerState } from './player.state';
 
 export class TurnStateModel {
     public nbTurn: number;
@@ -8,19 +10,25 @@ export class TurnStateModel {
     public isPlayerEndOfTurn: boolean;
     public isEndOfTurn: boolean;
     public remainingActions: number;
+    //public winner: string;
+    public isEndOfGame: boolean;
 }
 
 @State<TurnStateModel> ({
     name: 'turn',
     defaults: {
         nbTurn: 0,
-        currentPlayer:0,
+        currentPlayer: GameLogic.BLUE_PLAYER,
         isPlayerEndOfTurn: false,
         isEndOfTurn: false,
-        remainingActions: 1
+        remainingActions: 1,
+        //winner: ''
+        isEndOfGame: false
     }
 })
 export class TurnState {
+    constructor(private store: Store) {}
+
     @Selector()
     static getRemainingActions(state: TurnStateModel) {
       return state.remainingActions;
@@ -41,7 +49,8 @@ export class TurnState {
             currentPlayer: turn.currentPlayer,
             isPlayerEndOfTurn: true,
             isEndOfTurn: turn.isEndOfTurn,
-            remainingActions: turn.remainingActions
+            remainingActions: turn.remainingActions,
+            isEndOfGame: turn.isEndOfGame
         });      
     }
 
@@ -55,7 +64,8 @@ export class TurnState {
                 currentPlayer: GameLogic.RED_PLAYER,
                 isPlayerEndOfTurn: false,
                 isEndOfTurn: turn.isEndOfTurn,
-                remainingActions: 1
+                remainingActions: 1,
+                isEndOfGame: turn.isEndOfGame
             });    
         }
         else {
@@ -72,7 +82,8 @@ export class TurnState {
             currentPlayer: GameLogic.BLUE_PLAYER,
             isPlayerEndOfTurn: false,
             isEndOfTurn: false,
-            remainingActions: 1
+            remainingActions: 1,
+            isEndOfGame: turn.isEndOfGame
         });
     }
 
@@ -99,11 +110,29 @@ export class TurnState {
             currentPlayer: turn.currentPlayer,
             isPlayerEndOfTurn: turn.isPlayerEndOfTurn,
             isEndOfTurn: turn.isEndOfTurn,
-            remainingActions: nbActions
+            remainingActions: nbActions,
+            isEndOfGame: turn.isEndOfGame
         });
 
         if (nbActions == 0) {
             ctx.dispatch(new EndPlayerTurn());
         }
+    }
+
+    @Action(EndGame)
+    endGame(ctx: StateContext<TurnStateModel>, { winner} : EndGame) {
+        const turn= ctx.getState();
+        const players = this.store.selectSnapshot(PlayerState.getPlayers);
+        ctx.dispatch( new SetScore(winner, players[winner].score, true));
+
+        ctx.patchState({
+            nbTurn: turn.nbTurn,
+            currentPlayer: turn.currentPlayer,
+            isPlayerEndOfTurn: turn.isPlayerEndOfTurn,
+            isEndOfTurn: turn.isEndOfTurn,
+            //winner: (winner == GameLogic.BLUE_PLAYER) ? 'Blue' : 'Red',
+            isEndOfGame: true,
+            remainingActions: 0
+        });
     }
 }

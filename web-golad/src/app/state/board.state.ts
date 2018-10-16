@@ -2,8 +2,9 @@ import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
 import { CreateBoard, AttributeCell, ApplyLife } from '../actions/board.action';
 import { Cell } from '../models/cell.model';
 import { GameLogic } from '../engine/logic';
-import { SetPlayerRemainingActions, NextPlayerTurn } from '../actions/turn.action';
+import { SetPlayerRemainingActions, NextPlayerTurn, EndGame } from '../actions/turn.action';
 import { TurnState } from './turn.state';
+import { SetName, SetScore } from '../actions/players.action';
 
 export class BoardStateModel {
     public size: number;
@@ -27,6 +28,9 @@ export class BoardState {
             size: size,
             cells: GameLogic.getDefaultBoard(size)
         });
+
+        ctx.dispatch(new SetName(GameLogic.BLUE_PLAYER, 'Blue'));
+        ctx.dispatch(new SetName(GameLogic.RED_PLAYER, 'Red'));
     }
 
     @Action(AttributeCell)
@@ -85,6 +89,9 @@ export class BoardState {
         const cellsByType = GameLogic.getCellsByType(updatedBoard);
         const newEmptyCells = GameLogic.evolveDyingCells(cellsByType[GameLogic.DYING]); //TODO if needed, split by solitude / overpopulation
         
+        let countBlueCells = 0;
+        let countRedCells = 0;
+
         for (const updCell of newEmptyCells) {
             updatedBoard[updCell.id].state = updCell.state;
             updatedBoard[updCell.id].player = updCell.player;
@@ -101,6 +108,8 @@ export class BoardState {
         for (const updCell of [...newLivingCells, ...newDyingCells]) {
             updatedBoard[updCell.id].state = updCell.state;
             updatedBoard[updCell.id].player = updCell.player;
+
+            if (updCell.player == GameLogic.BLUE_PLAYER) {countBlueCells ++;} else {countRedCells++;}
         }
 
         const newBornCells = GameLogic.evolveEmptyCells(cellsByType[GameLogic.EMPTY], updatedBoard, board.size);
@@ -115,6 +124,20 @@ export class BoardState {
             cells: updatedBoard
         });
 
-        ctx.dispatch(new NextPlayerTurn());
+        if (countRedCells == 0) {
+            ctx.dispatch(new EndGame(GameLogic.BLUE_PLAYER));
+            ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, true));
+            ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, false));
+        }
+        else if (countBlueCells == 0) {
+            ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, false));
+            ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, true));
+            ctx.dispatch(new EndGame(GameLogic.RED_PLAYER));
+        }
+        else {
+            ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, false));
+            ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, false));
+            ctx.dispatch(new NextPlayerTurn());
+        }
     }
 }

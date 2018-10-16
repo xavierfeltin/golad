@@ -20,3 +20,8 @@ export class SetPlayerRemainingActions {
     static readonly type = '[TURN] Set Player Remaining Actions';
     constructor( public nbActions: number) {}
 }
+
+export class EndGame {
+    static readonly type = '[TURN] End game';
+    constructor( public winner: number) {}
+}

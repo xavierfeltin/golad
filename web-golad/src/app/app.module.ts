@@ -11,6 +11,7 @@ import { GameStateComponent } from './container/game-state/game-state.component'
 import { ViewerComponent } from './container/viewer/viewer.component';
 import { TurnInfoComponent } from './container/turn-info/turn-info.component';
 import { TurnState } from './state/turn.state';
+import { PlayerState } from './state/player.state';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import { TurnState } from './state/turn.state';
     NgxsModule.forRoot([
       CounterState,
       BoardState,
-      TurnState
+      TurnState,
+      PlayerState
     ]),
   ],
   providers: [],

@@ -1,4 +1,4 @@
-import { Cell } from '../models/cell.model';
+import { Cell, FactoryCell } from '../models/cell.model';
 import { ModelShape } from 'babylonjs';
 import { Game } from './game';
 
@@ -9,8 +9,8 @@ export class GameLogic {
     public static BORN: number = 2;
     public static DYING: number = 3;
 
-    public static RED_PLAYER: number = 1;
     public static BLUE_PLAYER: number = 0;
+    public static RED_PLAYER: number = 1;    
     public static NO_PLAYER: number = -1;
 
     public static NB_NEIGHBORS_BORN: number = 3;
@@ -158,11 +158,7 @@ export class GameLogic {
     }
 
     public static updatePickedCell(cell: Cell, player: number, board: Cell[], size: number) {
-        let updCell: Cell = {
-            id: cell.id,
-            state: cell.state,
-            player: cell.player
-        };
+        let updCell: Cell = FactoryCell.copy(cell);
 
         // Manage state of new selected cell:
         // - If empty, create a new cell
@@ -189,7 +185,7 @@ export class GameLogic {
         return updCell;
     }
 
-    public static updatePickedNeighbors(neighbors: Cell[], board: Cell[], size: number) {
+    public static updatePickedNeighbors(neighbors: Cell[], board: Cell[], size: number): Cell[] {
         // Update neighbors:
         // - If neighbor is empty and there are 3 neighbors, a new cell is born
         // - Else:
@@ -270,3 +266,4 @@ export class GameLogic {
         return cells;
     }
 }
+
