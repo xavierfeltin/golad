@@ -22,9 +22,13 @@ export class Game {
     public static RED_BORN: number = 5;
     public static RED_DYING: number = 6;
     public static NEW_BLUE_CELL: number = 7;
-    public static NEW_RED_CELL: number = 8;
-    public static HALF_BLUE_CELL: number = 9;
-    public static HALF_RED_CELL: number = 10;
+    public static NEW_BLUE_CELL_DYING: number = 8;
+    public static NEW_RED_CELL: number = 9;
+    public static NEW_RED_CELL_DYING: number = 10;
+    public static HALF_BLUE_CELL: number = 11;
+    public static HALF_BLUE_CELL_DYING: number = 12;
+    public static HALF_RED_CELL: number = 13;
+    public static HALF_RED_CELL_DYING: number = 14;
     
     CELL_SIZE = 10.0;
     BOARD_SIZE = 20; //replace later with player board selection
@@ -99,9 +103,13 @@ export class Game {
         multimat.subMaterials.push(this.generateMaterialFromTexture('red_born_cell.jpg', 'RedBorn'));
         multimat.subMaterials.push(this.generateMaterialFromTexture('red_dying_cell.jpg', 'RedDying'));       
         multimat.subMaterials.push(this.generateMaterialFromTexture('half_blue_empty_cell.jpg', 'NewBlueCell'));
+        multimat.subMaterials.push(this.generateMaterialFromTexture('half_blue_empty_dying_cell.jpg', 'NewBlueCellDying'));
         multimat.subMaterials.push(this.generateMaterialFromTexture('half_red_empty_cell.jpg', 'NewRedCell'));
+        multimat.subMaterials.push(this.generateMaterialFromTexture('half_red_empty_dying_cell.jpg', 'NewRedCellDying'));
         multimat.subMaterials.push(this.generateMaterialFromTexture('half_blue_cell.jpg', 'BlueHalfCell'));
+        multimat.subMaterials.push(this.generateMaterialFromTexture('half_blue_dying_cell.jpg', 'BlueHalfCellDying'));
         multimat.subMaterials.push(this.generateMaterialFromTexture('half_red_cell.jpg', 'RedHalfCell'));
+        multimat.subMaterials.push(this.generateMaterialFromTexture('half_red_dying_cell.jpg', 'RedHalfCellDying'));
 
         tiledGround.material = multimat;
         
@@ -136,10 +144,16 @@ export class Game {
                     break;}
                 case(GameLogic.NEW_CELL): {
                     board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.NEW_BLUE_CELL : Game.NEW_RED_CELL; 
-                    break;}         
+                    break;}     
+                case(GameLogic.NEW_CELL_DYING): {
+                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.NEW_BLUE_CELL_DYING : Game.NEW_RED_CELL_DYING; 
+                    break;}                             
                 case(GameLogic.HALF_CELL): {
                     board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.HALF_BLUE_CELL : Game.HALF_RED_CELL;
-                    break;}                   
+                    break;}     
+                case(GameLogic.HALF_CELL_DYING): {
+                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.HALF_BLUE_CELL_DYING : Game.HALF_RED_CELL_DYING;
+                    break;}                       
                 default: {
                     board.subMeshes[cell.id].materialIndex = GameLogic.EMPTY; 
                     break;}

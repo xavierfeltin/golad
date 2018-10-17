@@ -9,7 +9,9 @@ export class GameLogic {
     public static BORN: number = 2;
     public static DYING: number = 3;
     public static NEW_CELL: number = 4;
-    public static HALF_CELL: number = 5;
+    public static NEW_CELL_DYING: number = 5;
+    public static HALF_CELL: number = 6;
+    public static HALF_CELL_DYING: number = 7;
 
     public static BLUE_PLAYER: number = 0;
     public static RED_PLAYER: number = 1;    
@@ -32,9 +34,14 @@ export class GameLogic {
     }
 
     public static isCellConfortable(cell: Cell, board: Cell[], boardSize: number, mode: number): boolean {
-        const neighbors = GameLogic.getNeighbors(cell, board, boardSize, mode);         
-        return GameLogic.isLivingCell(cell) ? (neighbors.length == GameLogic.NB_NEIGHBORS_LIVE || neighbors.length == GameLogic.NB_NEIGHBORS_BORN)
-            : (neighbors.length == GameLogic.NB_NEIGHBORS_BORN);
+        const neighbors = GameLogic.getNeighbors(cell, board, boardSize, mode);        
+        
+        if (GameLogic.isLivingCell(cell) || this.isNewCell(cell) || this.isHalfCell(cell)) {
+            return (neighbors.length == GameLogic.NB_NEIGHBORS_LIVE || neighbors.length == GameLogic.NB_NEIGHBORS_BORN)
+        }
+        else {
+            return (neighbors.length == GameLogic.NB_NEIGHBORS_BORN);
+        }
     }
 
     /**
@@ -57,13 +64,17 @@ export class GameLogic {
                         
                         switch(mode) {
                             case GameLogic.MODE_APPLY_LIFE: {
-                                if(GameLogic.isLivingCell(board[idNeighbor])) {                  
+                                if(GameLogic.isLivingCell(board[idNeighbor]) 
+                                        || GameLogic.isNewCell(board[idNeighbor])
+                                        || GameLogic.isHalfCell(board[idNeighbor])) {                  
                                     neighbors.push(board[idNeighbor]);                 
                                 }
                                 break;    
                             }
                             case GameLogic.MODE_PICKING: {
-                                if(GameLogic.isLivingCell(board[idNeighbor])) {                  
+                                if(GameLogic.isLivingCell(board[idNeighbor])
+                                        || GameLogic.isNewCell(board[idNeighbor])
+                                        || GameLogic.isHalfCell(board[idNeighbor])) {            
                                     neighbors.push(board[idNeighbor]);                 
                                 }
                                 break;
@@ -160,11 +171,11 @@ export class GameLogic {
     }
 
     public static isNewCell(cell: Cell) {
-        return cell.state == GameLogic.NEW_CELL;
+        return cell.state == GameLogic.NEW_CELL || cell.state == GameLogic.NEW_CELL_DYING;
     }
 
     public static isHalfCell(cell: Cell) {
-        return cell.state == GameLogic.HALF_CELL;
+        return cell.state == GameLogic.HALF_CELL || cell.state == GameLogic.HALF_CELL_DYING;
     }
 
     public static updatePickedCell(cell: Cell, player: number, board: Cell[], size: number) {
@@ -183,7 +194,8 @@ export class GameLogic {
             }
         }
         else if(GameLogic.isNewCell(cell)) {
-            updCell.state = this.HALF_CELL;
+            updCell.state = GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING) ? 
+                GameLogic.HALF_CELL : GameLogic.HALF_CELL_DYING;
         }
         else if(GameLogic.isHalfCell(cell)) {
             updCell.state = GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING) ? 
@@ -191,7 +203,10 @@ export class GameLogic {
         }        
         else { //Empty cell
             updCell.player = player;
-            updCell.state = this.NEW_CELL;                
+            updCell.state = GameLogic.NEW_CELL_DYING;
+            if (GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING)) {
+                updCell.state = GameLogic.NEW_CELL; 
+            }
         }
 
         return updCell;

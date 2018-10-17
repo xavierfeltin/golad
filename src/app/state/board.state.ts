@@ -5,7 +5,6 @@ import { GameLogic } from '../engine/logic';
 import { SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell } from '../actions/turn.action';
 import { TurnState } from './turn.state';
 import { SetName, SetScore } from '../actions/players.action';
-import { FactorGradient } from 'babylonjs';
 
 export class BoardStateModel {
     public size: number;
@@ -85,7 +84,7 @@ export class BoardState {
                 cells: updatedBoard
             });
             
-            if (pickedCell.state == GameLogic.NEW_CELL) {
+            if (GameLogic.isNewCell(pickedCell)) {
                 ctx.dispatch(new SetHalfCell(pickedCell));
                 ctx.dispatch(new SetPlayerRemainingActions(2));    
             }
