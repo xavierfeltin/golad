@@ -148,7 +148,7 @@ export class Game {
     }
 
     generateMaterialFromTexture(textureName, materialName) {
-        const fixedTexture = new Texture('/assets/' + textureName, this.scene);
+        const fixedTexture = new Texture('assets/' + textureName, this.scene);
         const material = new BABYLON.StandardMaterial(materialName, this.scene);
         material.diffuseTexture = fixedTexture;
         material.backFaceCulling = false;
