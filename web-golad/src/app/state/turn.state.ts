@@ -1,8 +1,9 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
-import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn, EndGame } from '../actions/turn.action';
+import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn, EndGame, SetHalfCell } from '../actions/turn.action';
 import { GameLogic } from '../engine/logic';
 import { SetScore } from '../actions/players.action';
 import { PlayerState } from './player.state';
+import { Cell, FactoryCell } from '../models/cell.model';
 
 export class TurnStateModel {
     public nbTurn: number;
@@ -10,8 +11,8 @@ export class TurnStateModel {
     public isPlayerEndOfTurn: boolean;
     public isEndOfTurn: boolean;
     public remainingActions: number;
-    //public winner: string;
     public isEndOfGame: boolean;
+    public halfCell: Cell;
 }
 
 @State<TurnStateModel> ({
@@ -22,8 +23,8 @@ export class TurnStateModel {
         isPlayerEndOfTurn: false,
         isEndOfTurn: false,
         remainingActions: 1,
-        //winner: ''
-        isEndOfGame: false
+        isEndOfGame: false,
+        halfCell: null
     }
 })
 export class TurnState {
@@ -39,6 +40,11 @@ export class TurnState {
         return state.currentPlayer;
     }
 
+    @Selector()
+    static getHalfCell(state: TurnStateModel) {
+        return state.halfCell;
+    }
+
     @Action(EndPlayerTurn)
     endPlayerTurn(ctx: StateContext<TurnStateModel>) {        
         const turn= ctx.getState();
@@ -50,7 +56,8 @@ export class TurnState {
             isPlayerEndOfTurn: true,
             isEndOfTurn: turn.isEndOfTurn,
             remainingActions: turn.remainingActions,
-            isEndOfGame: turn.isEndOfGame
+            isEndOfGame: turn.isEndOfGame,
+            halfCell: turn.halfCell
         });      
     }
 
@@ -65,7 +72,8 @@ export class TurnState {
                 isPlayerEndOfTurn: false,
                 isEndOfTurn: turn.isEndOfTurn,
                 remainingActions: 1,
-                isEndOfGame: turn.isEndOfGame
+                isEndOfGame: turn.isEndOfGame,
+                halfCell: turn.halfCell
             });    
         }
         else {
@@ -83,24 +91,10 @@ export class TurnState {
             isPlayerEndOfTurn: false,
             isEndOfTurn: false,
             remainingActions: 1,
-            isEndOfGame: turn.isEndOfGame
+            isEndOfGame: turn.isEndOfGame,
+            halfCell: turn.halfCell
         });
     }
-
-    /*
-    @Action(EndTurn)
-    EndTurn(ctx: StateContext<TurnStateModel>) {        
-        const turn= ctx.getState();
-        ctx.patchState({
-            nbTurn: turn.nbTurn,
-            currentPlayer: turn.currentPlayer,
-            isPlayerEndOfTurn: turn.isPlayerEndOfTurn,
-            isEndOfTurn: true,
-            remainingActions: turn.remainingActions
-        });
-        ctx.dispatch(new NextTurn());
-    }
-    */
 
     @Action(SetPlayerRemainingActions)
     setPlayerRemainingActions(ctx: StateContext<TurnStateModel>, { nbActions }: SetPlayerRemainingActions) {
@@ -111,6 +105,7 @@ export class TurnState {
             isPlayerEndOfTurn: turn.isPlayerEndOfTurn,
             isEndOfTurn: turn.isEndOfTurn,
             remainingActions: nbActions,
+            halfCell: turn.halfCell,
             isEndOfGame: turn.isEndOfGame
         });
 
@@ -130,9 +125,24 @@ export class TurnState {
             currentPlayer: turn.currentPlayer,
             isPlayerEndOfTurn: turn.isPlayerEndOfTurn,
             isEndOfTurn: turn.isEndOfTurn,
-            //winner: (winner == GameLogic.BLUE_PLAYER) ? 'Blue' : 'Red',
             isEndOfGame: true,
+            halfCell: turn.halfCell,
             remainingActions: 0
+        });
+    }
+
+    @Action(SetHalfCell)
+    setHalfCell(ctx: StateContext<TurnStateModel>, { cell } : SetHalfCell) {
+        const turn= ctx.getState();
+        
+        ctx.patchState({
+            nbTurn: turn.nbTurn,
+            currentPlayer: turn.currentPlayer,
+            isPlayerEndOfTurn: turn.isPlayerEndOfTurn,
+            isEndOfTurn: turn.isEndOfTurn,
+            isEndOfGame: turn.isEndOfGame,
+            halfCell: cell,
+            remainingActions: turn.remainingActions
         });
     }
 }

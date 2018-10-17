@@ -1,3 +1,5 @@
+import { Cell } from "../models/cell.model";
+
 export class EndPlayerTurn {
     static readonly type = '[TURN] End Player Turn';    
 }
@@ -24,4 +26,9 @@ export class SetPlayerRemainingActions {
 export class EndGame {
     static readonly type = '[TURN] End game';
     constructor( public winner: number) {}
+}
+
+export class SetHalfCell {
+    static readonly type = '[TURN] Set Half Cell';
+    constructor( public cell: Cell) {}
 }

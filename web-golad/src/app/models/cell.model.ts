@@ -10,6 +10,7 @@ export class FactoryCell {
     }
 
     public static copy(cell: Cell): Cell {
-        return {id: cell.id, player: cell.player, state: cell.state};
+        if (cell == null) {return null;}
+        else {return {id: cell.id, player: cell.player, state: cell.state};}
     }
 }

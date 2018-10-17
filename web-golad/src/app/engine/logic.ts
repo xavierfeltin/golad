@@ -8,6 +8,8 @@ export class GameLogic {
     public static LIVING: number = 1;
     public static BORN: number = 2;
     public static DYING: number = 3;
+    public static NEW_CELL: number = 4;
+    public static HALF_CELL: number = 5;
 
     public static BLUE_PLAYER: number = 0;
     public static RED_PLAYER: number = 1;    
@@ -157,6 +159,14 @@ export class GameLogic {
         return (blueCount > redCount) ? GameLogic.BLUE_PLAYER : GameLogic.RED_PLAYER;
     }
 
+    public static isNewCell(cell: Cell) {
+        return cell.state == GameLogic.NEW_CELL;
+    }
+
+    public static isHalfCell(cell: Cell) {
+        return cell.state == GameLogic.HALF_CELL;
+    }
+
     public static updatePickedCell(cell: Cell, player: number, board: Cell[], size: number) {
         let updCell: Cell = FactoryCell.copy(cell);
 
@@ -172,14 +182,16 @@ export class GameLogic {
                 updCell.state = GameLogic.BORN;
             }
         }
-        else {
+        else if(GameLogic.isNewCell(cell)) {
+            updCell.state = this.HALF_CELL;
+        }
+        else if(GameLogic.isHalfCell(cell)) {
+            updCell.state = GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING) ? 
+                GameLogic.LIVING : GameLogic.DYING;
+        }        
+        else { //Empty cell
             updCell.player = player;
-            if (GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING)) {
-                updCell.state = GameLogic.LIVING;
-            }
-            else {
-                updCell.state = GameLogic.DYING;
-            }                            
+            updCell.state = this.NEW_CELL;                
         }
 
         return updCell;

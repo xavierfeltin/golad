@@ -1,10 +1,11 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
 import { CreateBoard, AttributeCell, ApplyLife } from '../actions/board.action';
-import { Cell } from '../models/cell.model';
+import { Cell, FactoryCell } from '../models/cell.model';
 import { GameLogic } from '../engine/logic';
-import { SetPlayerRemainingActions, NextPlayerTurn, EndGame } from '../actions/turn.action';
+import { SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell } from '../actions/turn.action';
 import { TurnState } from './turn.state';
 import { SetName, SetScore } from '../actions/players.action';
+import { FactorGradient } from 'babylonjs';
 
 export class BoardStateModel {
     public size: number;
@@ -37,37 +38,65 @@ export class BoardState {
     attributeCell(ctx: StateContext<BoardStateModel>, { cell }: AttributeCell) {
         const board = ctx.getState();
         const playerRemainingActions = this.store.selectSnapshot(TurnState.getRemainingActions);
+        let halfCell = FactoryCell.copy(this.store.selectSnapshot(TurnState.getHalfCell));
         const currentPlayer = this.store.selectSnapshot(TurnState.getCurrentPlayer);
-        const neighborsCells = GameLogic.getNeighbors(cell, board.cells, board.size, GameLogic.MODE_ALL_NEIGHBORS);
         
-        if (playerRemainingActions > 0) {
-            let updatedBoard = [...board.cells];
+        let updatedBoard = [...board.cells];
 
-            // Manage state of new selected cell:
-            // - If empty, create a new cell
-            // - If alive/dying, delete the cell
+        const isApplyPicking = (playerRemainingActions > 0) 
+                                && (
+                                    (halfCell != null && (
+                                        (cell.state == GameLogic.LIVING || cell.state == GameLogic.DYING)
+                                        && cell.player == currentPlayer        
+                                    ))
+                                    || (halfCell == null)
+                                );
+
+        if (isApplyPicking) {
+            // Update picked cell
             const pickedCell = GameLogic.updatePickedCell(cell, currentPlayer, updatedBoard, board.size);
             updatedBoard[pickedCell.id].state = pickedCell.state;
             updatedBoard[pickedCell.id].player = pickedCell.player;
 
-            // Update neighbors:
-            // - If neighbor is empty and there are 3 neighbors, a new cell is born
-            // - Else:
-            //  if neighbor is supposed to be born, it disappear
-            //  if neighbor is alive, it will die
+            // Update neighbors
+            const neighborsCells = GameLogic.getNeighbors(cell, updatedBoard, board.size, GameLogic.MODE_ALL_NEIGHBORS);
             const updatedNeighbors = GameLogic.updatePickedNeighbors(neighborsCells, updatedBoard, board.size);
             for (const neighbor of updatedNeighbors) {
                 updatedBoard[neighbor.id].state = neighbor.state;
                 updatedBoard[neighbor.id].player = neighbor.player;
             }
 
+            if(halfCell != null) {
+                //Update associated half cell
+                halfCell = GameLogic.updatePickedCell(halfCell, currentPlayer, updatedBoard, board.size);
+                updatedBoard[halfCell.id].state = halfCell.state;
+
+                //Update neighbors, could be done only when half-cell is completed
+                const neighborsCells = GameLogic.getNeighbors(halfCell, updatedBoard, board.size, GameLogic.MODE_ALL_NEIGHBORS);
+                const updatedNeighbors = GameLogic.updatePickedNeighbors(neighborsCells, updatedBoard, board.size);
+                for (const neighbor of updatedNeighbors) {
+                    updatedBoard[neighbor.id].state = neighbor.state;
+                    updatedBoard[neighbor.id].player = neighbor.player;
+                }
+            }
+
             ctx.patchState({
                 size: board.size,
                 cells: updatedBoard
             });
-                    
-            ctx.dispatch(new SetPlayerRemainingActions(0));
-            //TODO: manage when player needs to delete two cells for creating new cell        
+            
+            if (pickedCell.state == GameLogic.NEW_CELL) {
+                ctx.dispatch(new SetHalfCell(pickedCell));
+                ctx.dispatch(new SetPlayerRemainingActions(2));    
+            }
+            else {
+                const remainingActions = playerRemainingActions - 1; 
+                if (halfCell != null) {                    
+                    if (remainingActions == 0) { ctx.dispatch(new SetHalfCell(null)); }
+                    else {ctx.dispatch(new SetHalfCell(halfCell)); }
+                }                
+                ctx.dispatch(new SetPlayerRemainingActions(remainingActions));
+            }        
         }
         return board;        
     }
