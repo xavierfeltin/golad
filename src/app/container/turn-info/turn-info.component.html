@@ -1,17 +1,23 @@
-<h3> Score</h3>
-<p> {{displayBluePlayer()}}: {{displayScoreBluePlayer()}} 
-    - {{displayRedPlayer()}}: {{displayScoreRedPlayer()}} </p>
-<p> Turn: {{turn}} - {{displayPlayer(player)}} is playing ! </p>
-<ng-container *ngIf="isEndPlayerTurn">
-    <button class="ui_element" (click)="applyLife()"> Apply Life </button>    
-</ng-container>
+<div class="toolbar">
+    <div class="turn-info"> 
+        <ng-container *ngIf="!turn.isEndOfGame; else endgame">    
+            <div> Turn: {{turn.nbTurn}} - <span [ngClass]="(isBluePlayer())?'blue-font':'red-font'"> {{displayPlayer(turn.currentPlayer)}} </span> is playing ! </div>
+            <div> <button class="ui_element" (click)="applyLife()" [disabled]="!turn.isPlayerEndOfTurn"> Apply Life </button> </div>
+        </ng-container>   
+    </div>
 
-<ng-container *ngIf="isEndGame">
-    <ng-container *ngIf="isBlueWinner(); else redwinner">
-        <p>{{displayBluePlayer(player)}} wins</p>    
-    </ng-container>
-</ng-container>
+    <ng-template #endgame>
+        <p> Congratulations !!! 
+            <span [ngClass]="(isBluePlayer())?'blue-font':'red-font'">
+                <ng-container *ngIf="isBlueWinner(); else redwinner">
+                    {{displayBluePlayer(player)}}     
+                </ng-container>
+            </span>
+            wins !
+        </p>
+    </ng-template>
 
-<ng-template #redwinner>
-    <p>{{displayRedPlayer(player)}} wins</p>    
-</ng-template>
+    <ng-template #redwinner>
+        {{displayRedPlayer(player)}}    
+    </ng-template>
+</div>

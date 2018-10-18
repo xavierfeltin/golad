@@ -1,4 +1,23 @@
 <div class="ui_layout">
+    <div style="border: solid; margin: 15px; padding: 5px;">
+        <h2> Game Of Life And Death </h2>
+        <h3> History </h3>
+        <p> Based on Conway's game of life. Two players are evolving cells in order to kill all the opponent's cells. </p>
+        <p> At each turn, the cells are evolving applying the games of life principles: </p>
+        <ul>
+            <li> A cell dies of solitude with less than 2 neighbors</li>
+            <li> A cell dies of surpopulation with more than 2 neighbors</li>
+            <li> A new cell is born with 3 neighbors around</li>
+        </ul>
+        <h3> Gameplay </h3>
+        <ul>
+            <li> Click on a existing cell to kill it</li>
+            <li> Click on empty cell to create a new cell. <br/>
+            Then click on two of your cells to feed the new cell</li>
+            <li> Apply Life to end your turn</li>
+        </ul>
+    </div>
     <app-game-visualizer class="ui_element"></app-game-visualizer>
     <app-game-state class="ui_element"></app-game-state>
+    <div></div>
 </div>

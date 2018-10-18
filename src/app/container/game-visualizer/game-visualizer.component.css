@@ -1,0 +1,24 @@
+.game-area {
+    width: 500px;
+    height: 500px;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.one {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.two {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.three {
+    grid-column: 1;
+    grid-row: 3;
+}

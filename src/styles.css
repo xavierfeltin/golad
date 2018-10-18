@@ -1,4 +1,17 @@
-/* You can add global styles to this file, and also import other style files */
+@import url(https://fonts.googleapis.com/css?family=Kodchasan);
+
+:root {
+    --font-family: 'Kodchasan', sans-serif;
+}
+  
+body {
+    font-family: var(--font-family);
+}
+
+button {
+    font-family: var(--font-family);
+}
+
 .ui_element {
     margin: 15px;
 }

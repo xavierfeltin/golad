@@ -12,6 +12,7 @@ import { ViewerComponent } from './container/viewer/viewer.component';
 import { TurnInfoComponent } from './container/turn-info/turn-info.component';
 import { TurnState } from './state/turn.state';
 import { PlayerState } from './state/player.state';
+import { PlayersInfoComponent } from './container/players-info/players-info.component';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { PlayerState } from './state/player.state';
     DisplayCounterComponent,
     GameVisualizerComponent,
     GameStateComponent,
-    TurnInfoComponent
+    TurnInfoComponent,
+    PlayersInfoComponent
   ],
   imports: [
     BrowserModule,

@@ -2,7 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Store, Select } from '@ngxs/store';
 import { Cell } from '../../models/cell.model';
 import { Observable } from 'rxjs';
-import { AttributeCell } from '../../actions/board.action';
+import { AttributeCell, ApplyLife } from '../../actions/board.action';
+import { Player } from '../../models/player.model';
+import { PlayerState } from '../../state/player.state';
+import { TurnState, TurnStateModel } from '../../state/turn.state';
 
 @Component({
   selector: 'app-game-visualizer',
@@ -13,6 +16,8 @@ export class GameVisualizerComponent implements OnInit {
   
   @Select(state => state.board.size) size$: Observable<number>;
   @Select(state => state.board.cells) cells$: Observable<Cell[]>;
+  @Select(PlayerState.getPlayers) players$: Observable<Player[]>;
+  @Select(TurnState.getTurn) turn$: Observable<TurnStateModel>;
   pickedName: string = '';
 
   constructor(private store: Store) {}
@@ -21,5 +26,9 @@ export class GameVisualizerComponent implements OnInit {
 
   onPick(cell) {
     this.store.dispatch(new AttributeCell(cell)); //cell + player    
+  }
+  
+  applyLife() {
+    this.store.dispatch(new ApplyLife());    
   }
 }

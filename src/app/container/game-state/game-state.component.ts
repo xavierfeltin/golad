@@ -3,6 +3,8 @@ import { Store, Select } from '@ngxs/store';
 import { CreateBoard, ApplyLife } from '../../actions/board.action';
 import { Observable } from 'babylonjs';
 import { PlayerState } from '../../state/player.state';
+import { Player } from '../../models/player.model';
+import { TurnStateModel, TurnState } from '../../state/turn.state';
 
 @Component({
   selector: 'app-game-state',
@@ -10,13 +12,14 @@ import { PlayerState } from '../../state/player.state';
   styleUrls: ['./game-state.component.css']
 })
 export class GameStateComponent implements OnInit {
+  /*
   @Select(state => state.turn.nbTurn) turn$: Observable<number>;
   @Select(state => state.turn.currentPlayer) player$: Observable<number>;
   @Select(state => state.turn.isPlayerEndOfTurn) endTurn$: Observable<boolean>;
   @Select(state => state.turn.isEndOfGame) endGame$: Observable<boolean>;
-  @Select(PlayerState.scores) scores$: Observable<number[]>;
-  @Select(PlayerState.names) names$: Observable<string[]>;
-  @Select(PlayerState.winners) winners$: Observable<boolean[]>;
+  */
+  @Select(TurnState.getTurn) turn$: Observable<TurnStateModel>;
+  @Select(PlayerState.getPlayers) players$: Observable<Player[]>;
 
   constructor(private store: Store) { }
 
@@ -25,9 +28,5 @@ export class GameStateComponent implements OnInit {
 
   createGame() {
     this.store.dispatch(new CreateBoard(20));
-  }
-
-  applyLife() {
-    this.store.dispatch(new ApplyLife());    
   }
 }

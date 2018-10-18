@@ -1,0 +1,19 @@
+.toolbar {
+    border: solid darkgray;
+    background-color: darkgray;    
+    color: white;
+}
+
+.turn-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.blue-font {
+    color: blue;
+}
+
+.red-font {
+    color: red;
+}

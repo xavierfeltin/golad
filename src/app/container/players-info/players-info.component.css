@@ -1,0 +1,43 @@
+.toolbar{
+    display: flex;
+}
+
+.blue-player {
+    border: solid blue;
+    background-color: rgb(23, 66, 255);    
+    color: white;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+}
+
+.red-player {
+    border: solid red;
+    background-color: rgb(253, 47, 47);    
+    color: white;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+}
+
+.one {
+    grid-column: 1 / 2;
+    grid-row: 1;
+}
+.two { 
+    grid-column: 1 / 2;
+    grid-row: 2;
+}
+.three {
+    grid-column: 2 / 2;
+    grid-row: 2;
+    text-align: right;
+}
+
+.red-square {
+    background-image: url('/assets/red_square.jpg') !important;
+}
+
+.blue-square {
+    background-image: url('/assets/blue_square.jpg') !important;
+}

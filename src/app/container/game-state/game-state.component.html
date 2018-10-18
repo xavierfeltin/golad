@@ -1,12 +1,3 @@
 <div>
   <button class="ui_element" (click)="createGame()"> Create New Game </button>  
 </div>
-<app-turn-info (nextTurn)="applyLife()" 
-  [turn]="turn$ | async" 
-  [player]="player$ | async"  
-  [isEndPlayerTurn]="endTurn$ | async"
-  [isEndGame]="endGame$ | async"
-  [scores]="scores$ | async"
-  [names]="names$ | async"
-  [winners]="winners$ | async"
-  ></app-turn-info>

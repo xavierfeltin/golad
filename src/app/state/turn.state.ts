@@ -31,6 +31,11 @@ export class TurnState {
     constructor(private store: Store) {}
 
     @Selector()
+    static getTurn(state: TurnStateModel) {
+        return state;  
+    }
+
+    @Selector()
     static getRemainingActions(state: TurnStateModel) {
       return state.remainingActions;
     }

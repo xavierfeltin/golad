@@ -10,8 +10,8 @@ export class PlayerStateModel {
     name: 'players',
     defaults: {
         players: [
-            {name: '', score: 0, isWinner: false},
-            {name: '', score: 0, isWinner: false}
+            {name: 'Blue', score: 0, isWinner: false},
+            {name: 'Red', score: 0, isWinner: false}
         ]
     }
 })
