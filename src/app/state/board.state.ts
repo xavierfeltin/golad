@@ -4,9 +4,8 @@ import { Cell, FactoryCell } from '../models/cell.model';
 import { GameLogic } from '../engine/logic';
 import { SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell } from '../actions/turn.action';
 import { TurnState } from './turn.state';
-import { SetName, SetScore } from '../actions/players.action';
+import { SetScore } from '../actions/players.action';
 import { PlayerState } from './player.state';
-import { Game } from '../engine/game';
 
 export class BoardStateModel {
     public size: number;
@@ -31,9 +30,6 @@ export class BoardState {
             size: size,
             cells: board
         });
-
-        ctx.dispatch(new SetName(GameLogic.BLUE_PLAYER, 'Blue'));
-        ctx.dispatch(new SetName(GameLogic.RED_PLAYER, 'Red'));
 
         let countBlueCells = 0;
         let countRedCells = 0;

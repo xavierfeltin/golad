@@ -13,6 +13,8 @@ import { TurnInfoComponent } from './container/turn-info/turn-info.component';
 import { TurnState } from './state/turn.state';
 import { PlayerState } from './state/player.state';
 import { PlayersInfoComponent } from './container/players-info/players-info.component';
+import { ConfigGameComponent } from './container/config-game/config-game.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -24,10 +26,12 @@ import { PlayersInfoComponent } from './container/players-info/players-info.comp
     GameVisualizerComponent,
     GameStateComponent,
     TurnInfoComponent,
-    PlayersInfoComponent
+    PlayersInfoComponent,
+    ConfigGameComponent
   ],
   imports: [
     BrowserModule,
+    ReactiveFormsModule,
     NgxsModule.forRoot([
       CounterState,
       BoardState,

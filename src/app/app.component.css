@@ -3,3 +3,13 @@
     grid-template-columns: 1fr 1fr 1fr 1fr;
     justify-content: center;
 }
+
+.rules-layout {
+    display: flex;
+    flex-direction: column;        
+    margin: 15px;    
+}
+
+.rule-element {
+    margin: 0 0 5px 0;
+}

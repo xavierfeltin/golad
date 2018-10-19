@@ -2,7 +2,7 @@ import { Component, OnInit, AfterViewInit, Output, EventEmitter, Input } from '@
 import { GameLogic } from '../../engine/logic';
 import { Game } from '../../engine/game';
 import { Cell } from '../../models/cell.model';
-import { AbstractMesh, PickingInfo } from 'babylonjs';
+import { PickingInfo } from 'babylonjs';
 
 @Component({
   selector: 'app-viewer',

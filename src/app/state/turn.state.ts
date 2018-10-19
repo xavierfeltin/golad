@@ -1,9 +1,9 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
-import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn, EndGame, SetHalfCell } from '../actions/turn.action';
+import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn, EndGame, SetHalfCell, TurnReset } from '../actions/turn.action';
 import { GameLogic } from '../engine/logic';
 import { SetScore } from '../actions/players.action';
 import { PlayerState } from './player.state';
-import { Cell, FactoryCell } from '../models/cell.model';
+import { Cell } from '../models/cell.model';
 
 export class TurnStateModel {
     public nbTurn: number;
@@ -148,6 +148,21 @@ export class TurnState {
             isEndOfGame: turn.isEndOfGame,
             halfCell: cell,
             remainingActions: turn.remainingActions
+        });
+    }
+
+    @Action(TurnReset)
+    reset(ctx: StateContext<TurnStateModel>) {
+        const turn= ctx.getState();
+        
+        ctx.patchState({
+            nbTurn: 0,
+            currentPlayer: GameLogic.BLUE_PLAYER,
+            isPlayerEndOfTurn: false,
+            isEndOfTurn: false,
+            isEndOfGame: false,
+            halfCell: null,
+            remainingActions: 1
         });
     }
 }

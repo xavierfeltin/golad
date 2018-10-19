@@ -2,6 +2,7 @@
     border: solid darkgray;
     background-color: darkgray;    
     color: white;
+    height: 100%;
 }
 
 .turn-info {

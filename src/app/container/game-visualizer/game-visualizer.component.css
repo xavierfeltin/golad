@@ -1,11 +1,12 @@
-.game-area {
+.game-area {    
     width: 500px;
-    height: 500px;
+    height: 500px;    
 }
 
 .layout {
     display: grid;
     grid-template-columns: 1fr;
+    height: 100%;
 }
 
 .one {

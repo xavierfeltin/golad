@@ -32,3 +32,7 @@ export class SetHalfCell {
     static readonly type = '[TURN] Set Half Cell';
     constructor( public cell: Cell) {}
 }
+
+export class TurnReset {
+    static readonly type = '[TURN] Turn Reset';
+}
