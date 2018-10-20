@@ -57,8 +57,8 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     const mesh = pick.pickedMesh;
     let state = mesh.subMeshes[pick.subMeshId].materialIndex;
     
-    const redCells = [Game.RED_LIVING, Game.RED_DYING, Game.NEW_BLUE_CELL, Game.HALF_RED_CELL];
-    const blueCells = [Game.BLUE_LIVING, Game.BLUE_DYING, Game.NEW_RED_CELL, Game.HALF_RED_CELL];
+    const redCells = [Game.RED_LIVING, Game.RED_DYING, Game.NEW_RED_CELL, Game.HALF_RED_CELL, Game.RED_BORN];
+    const blueCells = [Game.BLUE_LIVING, Game.BLUE_DYING, Game.NEW_BLUE_CELL, Game.HALF_BLUE_CELL, Game.BLUE_BORN];
 
     let player = GameLogic.NO_PLAYER;
     if(redCells.includes(state)) {
@@ -66,6 +66,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       if (state == Game.RED_LIVING) {state = GameLogic.LIVING;}
       else if (state == Game.RED_DYING) {state = GameLogic.DYING;}
       else if (state == Game.NEW_RED_CELL) {state = GameLogic.NEW_CELL;}
+      else if (state == Game.RED_BORN) {state = GameLogic.BORN;}
       else {state = GameLogic.HALF_CELL;}
     }
     else if (blueCells.includes(state)) {
@@ -73,6 +74,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
       if (state == Game.BLUE_LIVING) {state = GameLogic.LIVING;}
       else if (state == Game.BLUE_DYING) {state = GameLogic.DYING;}
       else if (state == Game.NEW_BLUE_CELL) {state = GameLogic.NEW_CELL;}
+      else if (state == Game.BLUE_BORN) {state = GameLogic.BORN;}
       else {state = GameLogic.HALF_CELL;}
     }
  
