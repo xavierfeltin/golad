@@ -185,7 +185,6 @@ export class GameLogic {
         // - If empty, create a new cell
         // - If alive/dying, delete the cell
         if(GameLogic.isLivingCell(cell)) {
-            console.log('living');
             updCell.player = GameLogic.NO_PLAYER;
             updCell.state = GameLogic.EMPTY;
             
@@ -195,19 +194,16 @@ export class GameLogic {
             }
         }
         else if(GameLogic.isNewCell(cell)) {
-            console.log('new');
             updCell.player = player;
             updCell.state = GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING) ? 
                 GameLogic.HALF_CELL : GameLogic.HALF_CELL_DYING;
         }
         else if(GameLogic.isHalfCell(cell)) {
-            console.log('half');
             updCell.player = player;
             updCell.state = GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING) ? 
                 GameLogic.LIVING : GameLogic.DYING;
         }        
         else { //Empty cell, or to be born
-            console.log('empty');
             updCell.player = player;
             updCell.state = GameLogic.NEW_CELL_DYING;
             if (GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING)) {
