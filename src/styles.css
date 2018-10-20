@@ -6,7 +6,7 @@
   
 body {
     font-family: var(--font-family);
-    background-color: beige;
+    background-color: rgb(255, 255, 248);
 }
 
 button {

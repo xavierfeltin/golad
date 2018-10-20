@@ -26,7 +26,9 @@ export class BoardState {
 
     @Action(CreateBoard)
     createBoard(ctx: StateContext<BoardStateModel>, { size }: CreateBoard) {
-        const board = GameLogic.getDefaultBoard(size);
+        //const board = GameLogic.getDefaultBoard(size);
+        const board = GameLogic.getRandomBoard();
+
         ctx.patchState({
             size: size,
             cells: board
@@ -36,10 +38,10 @@ export class BoardState {
         let countRedCells = 0;
 
         for (const cell of board) {
-            if (cell.player == GameLogic.BLUE_PLAYER) {
+            if (cell.player == GameLogic.BLUE_PLAYER && GameLogic.isLivingCell(cell)) {
                 countBlueCells ++;
             }
-            else if (cell.player == GameLogic.RED_PLAYER) {
+            else if (cell.player == GameLogic.RED_PLAYER && GameLogic.isLivingCell(cell)) {
                 countRedCells ++;
             }
         }

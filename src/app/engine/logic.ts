@@ -292,5 +292,40 @@ export class GameLogic {
 
         return cells;
     }
-}
 
+    public static getRandomBoard(): Cell[] {
+        const boardSize = 20 * 20;
+        const nbCells = 150;
+
+        let cells = [];
+        for (let i = 0; i < boardSize; i++) {
+            const cell: Cell = {
+                id: i,
+                player: GameLogic.NO_PLAYER,
+                state: GameLogic.EMPTY
+            }
+            cells.push(cell);  
+        }
+
+        let currentPlayer = GameLogic.BLUE_PLAYER;
+        let availableCells = Array.from(new Array(boardSize),(val,index)=>index);
+        for(let i = 0; i < nbCells; i++) {
+            const rand = Math.floor(Math.random() * availableCells.length);
+            const index = availableCells[rand];
+            cells[index].state = GameLogic.isCellConfortable(cells[index], cells, 20, GameLogic.MODE_PICKING) ? GameLogic.LIVING : GameLogic.DYING; 
+            cells[index].player = currentPlayer;
+            
+            const neighborsCells = GameLogic.getNeighbors(cells[index], cells, 20, GameLogic.MODE_ALL_NEIGHBORS);
+            const updatedNeighbors = GameLogic.updatePickedNeighbors(neighborsCells, cells, 20);
+            for (const neighbor of updatedNeighbors) {
+                cells[neighbor.id].state = neighbor.state;
+                cells[neighbor.id].player = neighbor.player;
+            }
+
+            availableCells = availableCells.filter((val, j) => {return val != index});
+            currentPlayer = (currentPlayer == GameLogic.BLUE_PLAYER) ? GameLogic.RED_PLAYER :GameLogic.BLUE_PLAYER;
+        }
+
+        return cells;
+    }
+}
