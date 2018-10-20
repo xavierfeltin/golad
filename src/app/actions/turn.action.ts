@@ -1,14 +1,9 @@
 import { Cell } from "../models/cell.model";
+import { TurnStateModel } from "../state/turn.state";
 
 export class EndPlayerTurn {
     static readonly type = '[TURN] End Player Turn';    
 }
-
-/*
-export class EndTurn {
-    static readonly type = '[TURN] End Turn';
-}
-*/
 
 export class NextTurn {
     static readonly type = '[TURN] Next Turn';
@@ -35,4 +30,9 @@ export class SetHalfCell {
 
 export class TurnReset {
     static readonly type = '[TURN] Turn Reset';
+}
+
+export class RestoreTurn {
+    static readonly type = '[TURN] Restore Turn';
+    constructor(public turn: TurnStateModel) {}
 }

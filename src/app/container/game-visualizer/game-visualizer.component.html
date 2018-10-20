@@ -3,5 +3,10 @@
     <div class="game-area two">
         <app-viewer (pickObject)="onPick($event)" [size]="size$ | async" [board]="cells$ | async"></app-viewer>
     </div>
-    <app-turn-info class="three" (nextTurn)="applyLife()" [turn]="turn$ | async" [players]="players$ | async"></app-turn-info>
+    <app-turn-info class="three" 
+        (nextTurn)="applyLife()" 
+        (undo)="restoreTurn()"
+        [turn]="turn$ | async" 
+        [players]="players$ | async"
+        [nbSavePoints]="nbSavePoints$ | async"></app-turn-info>
 </div>

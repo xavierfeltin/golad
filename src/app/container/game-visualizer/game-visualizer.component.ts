@@ -6,6 +6,8 @@ import { AttributeCell, ApplyLife } from '../../actions/board.action';
 import { Player } from '../../models/player.model';
 import { PlayerState } from '../../state/player.state';
 import { TurnState, TurnStateModel } from '../../state/turn.state';
+import { SavePointState } from '../../state/savepoint.state';
+import { RestoreLastTurn } from '../../actions/savepoint.action';
 
 @Component({
   selector: 'app-game-visualizer',
@@ -18,6 +20,7 @@ export class GameVisualizerComponent implements OnInit {
   @Select(state => state.board.cells) cells$: Observable<Cell[]>;
   @Select(PlayerState.getPlayers) players$: Observable<Player[]>;
   @Select(TurnState.getTurn) turn$: Observable<TurnStateModel>;
+  @Select(SavePointState.getNbRestorePoints) nbSavePoints$: Observable<number>;
   pickedName: string = '';
 
   constructor(private store: Store) {}
@@ -30,5 +33,9 @@ export class GameVisualizerComponent implements OnInit {
   
   applyLife() {
     this.store.dispatch(new ApplyLife());    
+  }
+
+  restoreTurn() {
+    this.store.dispatch(new RestoreLastTurn());   
   }
 }

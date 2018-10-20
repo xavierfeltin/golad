@@ -179,7 +179,7 @@ export class GameLogic {
     }
 
     public static updatePickedCell(cell: Cell, player: number, board: Cell[], size: number) {
-        let updCell: Cell = FactoryCell.copy(cell);
+        let updCell = FactoryCell.copy(cell);
 
         // Manage state of new selected cell:
         // - If empty, create a new cell
@@ -219,9 +219,9 @@ export class GameLogic {
         //  if neighbor is supposed to be born, it disappear
         //  if neighbor is alive, it will die
 
-        let updatedNeighbors = [...neighbors];
+        let updatedNeighbors = neighbors.map(c => FactoryCell.copy(c));
 
-        for(const updCell of updatedNeighbors) {
+        for(let updCell of updatedNeighbors) {
             if (GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING)) {
                 if (updCell.state == GameLogic.EMPTY) {
                     updCell.player = GameLogic.defineBornCellPlayer(updCell, board, size);

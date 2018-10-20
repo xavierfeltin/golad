@@ -2,15 +2,16 @@
     <div class="turn-info"> 
         <ng-container *ngIf="!turn.isEndOfGame; else endgame">    
             <div> Turn: {{turn.nbTurn}} - <span [ngClass]="(isBluePlayer())?'blue-font':'red-font'"> {{displayPlayer(turn.currentPlayer)}} </span> is playing ! </div>
+            <div> <button class="ui_element" (click)="undoTurn()" [disabled]="nbSavePoints == 0"> Undo ({{nbSavePoints}}) </button> </div>
             <div> <button class="ui_element" (click)="applyLife()" [disabled]="!turn.isPlayerEndOfTurn"> Apply Life </button> </div>
         </ng-container>   
     </div>
 
     <ng-template #endgame>
         <p> Congratulations !!! 
-            <span [ngClass]="(isBluePlayer())?'blue-font':'red-font'">
+            <span [ngClass]="(isBlueWinner())?'blue-font': (isRedWinner() ? 'red-font' : '')">
                 <ng-container *ngIf="isBlueWinner(); else redwinner">
-                    {{displayBluePlayer(player)}}     
+                    {{displayBluePlayer()}}     
                 </ng-container>
             </span>
             wins !
@@ -18,6 +19,12 @@
     </ng-template>
 
     <ng-template #redwinner>
-        {{displayRedPlayer(player)}}    
+        <ng-container *ngIf="isRedWinner(); else draw">
+            {{displayRedPlayer()}}   
+        </ng-container> 
+    </ng-template>
+
+    <ng-template #draw>
+            {{displayNoPlayer()}}    
     </ng-template>
 </div>

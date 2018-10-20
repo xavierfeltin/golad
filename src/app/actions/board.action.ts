@@ -13,3 +13,8 @@ export class AttributeCell {
 export class ApplyLife {
     static readonly type = '[BOARD] Apply Live';
 }
+
+export class RestoreBoard {
+    static readonly type = '[TURN] Restore Board';
+    constructor(public cells: Cell[]) {}
+}

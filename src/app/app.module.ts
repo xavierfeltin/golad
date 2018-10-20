@@ -7,7 +7,6 @@ import { BoardState } from './state/board.state';
 import { EditCounterComponent } from './container/edit-counter/edit-counter.component';
 import { DisplayCounterComponent } from './container/display-counter/display-counter.component';
 import { GameVisualizerComponent } from './container/game-visualizer/game-visualizer.component';
-import { GameStateComponent } from './container/game-state/game-state.component';
 import { ViewerComponent } from './container/viewer/viewer.component';
 import { TurnInfoComponent } from './container/turn-info/turn-info.component';
 import { TurnState } from './state/turn.state';
@@ -15,6 +14,7 @@ import { PlayerState } from './state/player.state';
 import { PlayersInfoComponent } from './container/players-info/players-info.component';
 import { ConfigGameComponent } from './container/config-game/config-game.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SavePointState } from './state/savepoint.state';
 
 
 @NgModule({
@@ -24,7 +24,6 @@ import { ReactiveFormsModule } from '@angular/forms';
     EditCounterComponent,
     DisplayCounterComponent,
     GameVisualizerComponent,
-    GameStateComponent,
     TurnInfoComponent,
     PlayersInfoComponent,
     ConfigGameComponent
@@ -36,7 +35,8 @@ import { ReactiveFormsModule } from '@angular/forms';
       CounterState,
       BoardState,
       TurnState,
-      PlayerState
+      PlayerState,
+      SavePointState
     ]),
   ],
   providers: [],

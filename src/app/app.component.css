@@ -1,7 +1,6 @@
 .ui_layout {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    justify-content: center;
+    grid-template-columns: 1fr 2fr 1fr;
 }
 
 .rules-layout {
@@ -12,4 +11,9 @@
 
 .rule-element {
     margin: 0 0 5px 0;
+}
+
+.game-area {
+    justify-self: center;
+    margin: 15px;
 }

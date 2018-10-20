@@ -1,5 +1,5 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
-import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn, EndGame, SetHalfCell, TurnReset } from '../actions/turn.action';
+import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn, EndGame, SetHalfCell, TurnReset, RestoreTurn } from '../actions/turn.action';
 import { GameLogic } from '../engine/logic';
 import { SetScore } from '../actions/players.action';
 import { PlayerState } from './player.state';
@@ -123,8 +123,11 @@ export class TurnState {
     endGame(ctx: StateContext<TurnStateModel>, { winner} : EndGame) {
         const turn= ctx.getState();
         const players = this.store.selectSnapshot(PlayerState.getPlayers);
-        ctx.dispatch( new SetScore(winner, players[winner].score, true));
 
+        if (winner != GameLogic.NO_PLAYER) {
+            ctx.dispatch( new SetScore(winner, players[winner].score, true));   
+        }
+        
         ctx.patchState({
             nbTurn: turn.nbTurn,
             currentPlayer: turn.currentPlayer,
@@ -163,6 +166,19 @@ export class TurnState {
             isEndOfGame: false,
             halfCell: null,
             remainingActions: 1
+        });
+    }
+
+    @Action(RestoreTurn)
+    restoreTurn(ctx: StateContext<TurnStateModel>, { turn }: RestoreTurn) {
+        ctx.patchState({
+            nbTurn: turn.nbTurn,
+            currentPlayer: turn.currentPlayer,
+            isPlayerEndOfTurn: turn.isPlayerEndOfTurn,
+            isEndOfTurn: turn.isEndOfTurn,
+            remainingActions: turn.remainingActions,
+            isEndOfGame: turn.isEndOfGame,
+            halfCell: turn.halfCell
         });
     }
 }
