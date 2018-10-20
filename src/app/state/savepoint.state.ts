@@ -1,6 +1,6 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
 import { Save, FactorySave } from '../models/save.model';
-import { AddSave, RemoveLastSave, RestoreLastTurn } from '../actions/savepoint.action';
+import { AddSave, RemoveLastSave, RestoreLastTurn, CleanSavePoints } from '../actions/savepoint.action';
 import { RestoreTurn } from '../actions/turn.action';
 import { RestoreBoard } from '../actions/board.action';
 import { RestorePlayer } from '../actions/players.action';
@@ -59,5 +59,12 @@ export class SavePointState {
         ctx.dispatch( new RestoreBoard(last.board));
         ctx.dispatch( new RestorePlayer(last.player));
         ctx.dispatch( new RemoveLastSave());
+    }
+
+    @Action(CleanSavePoints)
+    cleanSavePoints(ctx: StateContext<SavePointStateModel>) {
+        ctx.patchState({
+            savepoints: []
+        });
     }
 }

@@ -16,3 +16,8 @@ export class RestoreLastTurn {
     static readonly type = '[GAME] Restore Last State';
     constructor() {}
 }
+
+export class CleanSavePoints {
+    static readonly type = '[GAME] Clean Save Points';
+    constructor() {}
+}

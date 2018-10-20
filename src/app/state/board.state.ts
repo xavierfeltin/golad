@@ -6,7 +6,7 @@ import { SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell } from 
 import { TurnState } from './turn.state';
 import { SetScore } from '../actions/players.action';
 import { PlayerState } from './player.state';
-import { AddSave } from '../actions/savepoint.action';
+import { AddSave, CleanSavePoints } from '../actions/savepoint.action';
 
 export class BoardStateModel {
     public size: number;
@@ -184,26 +184,26 @@ export class BoardState {
             cells: updatedBoard
         });
 
+        let isBlueWinner = false;
+        let isRedWinner = false;
         if (countBlueCells == 0 && countRedCells == 0){
             ctx.dispatch(new EndGame(GameLogic.NO_PLAYER));
-            ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, false));
-            ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, false));
         }
         else if (countRedCells == 0) {
+            isBlueWinner = true;
             ctx.dispatch(new EndGame(GameLogic.BLUE_PLAYER));
-            ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, true));
-            ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, false));
         }
         else if (countBlueCells == 0) {
-            ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, false));
-            ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, true));
+            isRedWinner = true;
             ctx.dispatch(new EndGame(GameLogic.RED_PLAYER));
         }
         else {
-            ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, false));
-            ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, false));
             ctx.dispatch(new NextPlayerTurn());
         }
+
+        ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, isBlueWinner));
+        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, isRedWinner));
+        ctx.dispatch(new CleanSavePoints());
     }
 
     @Action(RestoreBoard)
