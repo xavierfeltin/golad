@@ -1,5 +1,5 @@
 # golad
-##Game of life and death
+## Game of life and death
 *A playable version of this project is available at*: https://xavierfeltin.github.io/golad/
 
 **This project is based on the**:
