@@ -1,6 +1,6 @@
 # golad
-Game of life and death
-*A playable version of this project is available at: https://xavierfeltin.github.io/golad/ *
+##Game of life and death
+*A playable version of this project is available at*: https://xavierfeltin.github.io/golad/
 
 **This project is based on the**:
   - Conway's Game Of Life (https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)
