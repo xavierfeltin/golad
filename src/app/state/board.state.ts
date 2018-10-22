@@ -146,8 +146,9 @@ export class BoardState {
     */
     applyLife(ctx: StateContext<BoardStateModel>) {
         const board = ctx.getState();
-        let updatedBoard = [...board.cells].map(c => FactoryCell.copy(c));
         
+        /*
+        let updatedBoard = [...board.cells].map(c => FactoryCell.copy(c));
         const cellsByType = GameLogic.getCellsByType(updatedBoard);
         const newEmptyCells = GameLogic.evolveDyingCells(cellsByType[GameLogic.DYING]); //TODO if needed, split by solitude / overpopulation
         
@@ -180,6 +181,12 @@ export class BoardState {
             updatedBoard[updCell.id].state = updCell.state;
             updatedBoard[updCell.id].player = updCell.player;
         }
+        */
+
+        const updatedBoard = GameLogic.applyLife(board.cells);
+        const scores = GameLogic.getScore(updatedBoard);
+        const countBlueCells = scores[GameLogic.BLUE_PLAYER];
+        const countRedCells = scores[GameLogic.RED_PLAYER];
 
         ctx.patchState({
             size: board.size,

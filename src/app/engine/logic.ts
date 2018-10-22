@@ -330,4 +330,49 @@ export class GameLogic {
 
         return cells;
     }
+
+    public static applyLife(board: Cell[]): Cell[] {
+        const boardSize = 20;
+        let updatedBoard = board.map(c => FactoryCell.copy(c));
+        
+        const cellsByType = GameLogic.getCellsByType(updatedBoard);
+        const newEmptyCells = GameLogic.evolveDyingCells(cellsByType[GameLogic.DYING]); //TODO if needed, split by solitude / overpopulation
+        
+        for (const updCell of newEmptyCells) {
+            updatedBoard[updCell.id].state = updCell.state;
+            updatedBoard[updCell.id].player = updCell.player;
+        }
+
+        const newCells = GameLogic.evolveBornCells(cellsByType[GameLogic.BORN], updatedBoard, boardSize);
+        let newLivingCells = newCells.filter((cell) => { return cell.state == GameLogic.LIVING});
+        let newDyingCells = newCells.filter((cell) => { return cell.state == GameLogic.DYING});
+
+        const newUpdCells = GameLogic.evolveLivingCells(cellsByType[GameLogic.LIVING], updatedBoard, boardSize);
+        newLivingCells = newLivingCells.concat(newUpdCells.filter((cell) => { return cell.state == GameLogic.LIVING}));
+        newDyingCells = newDyingCells.concat(newUpdCells.filter((cell) => { return cell.state == GameLogic.DYING}));
+
+        for (const updCell of [...newLivingCells, ...newDyingCells]) {
+            updatedBoard[updCell.id].state = updCell.state;
+            updatedBoard[updCell.id].player = updCell.player;            
+        }
+
+        const newBornCells = GameLogic.evolveEmptyCells(cellsByType[GameLogic.EMPTY], updatedBoard, boardSize);
+
+        for (const updCell of newBornCells) {
+            updatedBoard[updCell.id].state = updCell.state;
+            updatedBoard[updCell.id].player = updCell.player;
+        }
+
+        return updatedBoard;
+    }
+
+    public static getScore(board: Cell[]): number[] {
+        let scores = Array(2).fill(0);
+        for(const cell of board) {
+            if(GameLogic.isLivingCell(cell)) {
+                scores[cell.player]++;
+            }
+        }
+        return scores;
+    }
 }

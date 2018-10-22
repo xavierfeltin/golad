@@ -10,8 +10,8 @@ export class PlayerStateModel {
     name: 'players',
     defaults: {
         players: [
-            {name: 'Blue', score: 0, isWinner: false},
-            {name: 'Red', score: 0, isWinner: false}
+            {name: 'Blue', score: 0, isWinner: false, human: true},
+            {name: 'Red', score: 0, isWinner: false, human: true}
         ]
     }
 })
@@ -44,7 +44,8 @@ export class PlayerState {
         updPlayers[player] = {                
             name: name,
             score: updPlayers[player].score,
-            isWinner: updPlayers[player].isWinner
+            isWinner: updPlayers[player].isWinner,
+            human: updPlayers[player].human
         }
             
         ctx.patchState({
@@ -60,7 +61,8 @@ export class PlayerState {
         updPlayers[player] = {                
             name: updPlayers[player].name,
             score: score,
-            isWinner: isWinner
+            isWinner: isWinner,
+            human: updPlayers[player].human,
         }
             
         ctx.patchState({
@@ -76,7 +78,8 @@ export class PlayerState {
         updPlayers[index] = {
             name: player.name,
             score: player.score,
-            isWinner: player.isWinner
+            isWinner: player.isWinner,
+            human: player.human
         }
 
         ctx.patchState({

@@ -128,7 +128,7 @@ test('blue player picks an empty cell isolated, it becomes dying', () => {
     const updCell = GameLogic.updatePickedCell(cell, GameLogic.BLUE_PLAYER, board, 20); 
     expect(updCell.id).toEqual(24);
     expect(updCell.player).toEqual(GameLogic.BLUE_PLAYER);
-    expect(updCell.state).toEqual(GameLogic.DYING);
+    expect(updCell.state).toEqual(GameLogic.NEW_CELL_DYING);
 });
 
 test('blue player picks an empty cell with 3 neighbours, it becomes living', () => {
@@ -139,7 +139,7 @@ test('blue player picks an empty cell with 3 neighbours, it becomes living', () 
     const updCell = GameLogic.updatePickedCell(cell, GameLogic.BLUE_PLAYER, board, 20); 
     expect(updCell.id).toEqual(25);
     expect(updCell.player).toEqual(GameLogic.BLUE_PLAYER);
-    expect(updCell.state).toEqual(GameLogic.LIVING);
+    expect(updCell.state).toEqual(GameLogic.NEW_CELL);
 });
 
 test('One blue cell with 2 blue cells one case away, 2 new blue cells are born between', () => {
@@ -206,7 +206,7 @@ test('One cell with 2 living cells, the cell is killed by player, the neighbors 
 });
 
 test('2 dying cells, a cell is added next to them by player, the neighbors are living, one cell is born', () => {
-    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.NEW_CELL);
     board[26] = FactoryCell.create(26, GameLogic.RED_PLAYER, GameLogic.DYING);
     board[46] = FactoryCell.create(46, GameLogic.RED_PLAYER, GameLogic.DYING);
     
@@ -264,4 +264,168 @@ test('A cell has 3 neighbors below, a cell is added above by player, the cell is
             expect(neighbor.state).toEqual(GameLogic.EMPTY);
         }
     }
+});
+
+test('blue player picks a cell to nurrish a new cell isolated, it becomes half dying', () => {
+    const cell = FactoryCell.create(24, GameLogic.BLUE_PLAYER, GameLogic.NEW_CELL_DYING);
+    const updCell = GameLogic.updatePickedCell(cell, GameLogic.BLUE_PLAYER, board, 20); 
+    expect(updCell.id).toEqual(24);
+    expect(updCell.player).toEqual(GameLogic.BLUE_PLAYER);
+    expect(updCell.state).toEqual(GameLogic.HALF_CELL_DYING);
+});
+
+test('blue player picks a cell to nurrish a half cell isolated, it becomes dying', () => {
+    const cell = FactoryCell.create(24, GameLogic.BLUE_PLAYER, GameLogic.HALF_CELL_DYING);
+    const updCell = GameLogic.updatePickedCell(cell, GameLogic.BLUE_PLAYER, board, 20); 
+    expect(updCell.id).toEqual(24);
+    expect(updCell.player).toEqual(GameLogic.BLUE_PLAYER);
+    expect(updCell.state).toEqual(GameLogic.DYING);
+});
+
+test('blue player picks a cell to nurrish a new cell, it becomes half cell', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[4] = FactoryCell.create(4, GameLogic.RED_PLAYER, GameLogic.LIVING);
+
+    const cell = FactoryCell.create(24, GameLogic.BLUE_PLAYER, GameLogic.NEW_CELL);
+    const updCell = GameLogic.updatePickedCell(cell, GameLogic.BLUE_PLAYER, board, 20); 
+    expect(updCell.id).toEqual(24);
+    expect(updCell.player).toEqual(GameLogic.BLUE_PLAYER);
+    expect(updCell.state).toEqual(GameLogic.HALF_CELL);    
+});
+
+test('blue player picks a cell to nurrish a half cell isolated, it becomes living', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[4] = FactoryCell.create(4, GameLogic.RED_PLAYER, GameLogic.LIVING);
+
+    const cell = FactoryCell.create(24, GameLogic.BLUE_PLAYER, GameLogic.HALF_CELL);
+    const updCell = GameLogic.updatePickedCell(cell, GameLogic.BLUE_PLAYER, board, 20); 
+    expect(updCell.id).toEqual(24);
+    expect(updCell.player).toEqual(GameLogic.BLUE_PLAYER);
+    expect(updCell.state).toEqual(GameLogic.LIVING);
+});
+
+test('three stable cells, do not change after evolution', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[4] = FactoryCell.create(4, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[5] = FactoryCell.create(4, GameLogic.BLUE_PLAYER, GameLogic.LIVING);
+
+    const updBoard = GameLogic.applyLife(board);        
+    for(const i in [25,4,5]) {
+        expect(updBoard[i].id).toEqual(board[i].id);
+        expect(updBoard[i].state).toEqual(board[i].state);
+        expect(updBoard[i].player).toEqual(board[i].player);
+    }    
+});
+
+test('four stable cells, do not change after evolution', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[45] = FactoryCell.create(45, GameLogic.BLUE_PLAYER, GameLogic.LIVING);
+    board[4] = FactoryCell.create(4, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[5] = FactoryCell.create(4, GameLogic.BLUE_PLAYER, GameLogic.LIVING);
+
+    const updBoard = GameLogic.applyLife(board);        
+    for(const i in [25,4,5, 45]) {
+        expect(updBoard[i].id).toEqual(board[i].id);
+        expect(updBoard[i].state).toEqual(board[i].state);
+        expect(updBoard[i].player).toEqual(board[i].player);
+    }    
+});
+
+test('one dying cell, disappears after evolution', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.DYING);
+
+    const updBoard = GameLogic.applyLife(board);        
+    expect(updBoard[25].id).toEqual(board[25].id);
+    expect(updBoard[25].state).toEqual(GameLogic.EMPTY);
+    expect(updBoard[25].player).toEqual(GameLogic.NO_PLAYER);
+});
+
+test('one cell to be born in stable environment, becomes living after evolution', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.BORN);
+    board[45] = FactoryCell.create(45, GameLogic.BLUE_PLAYER, GameLogic.LIVING);
+    board[4] = FactoryCell.create(4, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[5] = FactoryCell.create(4, GameLogic.BLUE_PLAYER, GameLogic.LIVING);
+
+    const updBoard = GameLogic.applyLife(board);        
+    expect(updBoard[25].id).toEqual(board[25].id);
+    expect(updBoard[25].state).toEqual(GameLogic.LIVING);
+    expect(updBoard[25].player).toEqual(board[25].player);
+
+    for(const i in [4,5, 45]) {
+        expect(updBoard[i].id).toEqual(board[i].id);
+        expect(updBoard[i].state).toEqual(board[i].state);
+        expect(updBoard[i].player).toEqual(board[i].player);
+    }    
+});
+
+test('one cell to be born in dying environment, becomes dying after evolution', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.BORN);
+    board[45] = FactoryCell.create(45, GameLogic.BLUE_PLAYER, GameLogic.DYING);
+    board[4] = FactoryCell.create(4, GameLogic.RED_PLAYER, GameLogic.DYING);
+    board[5] = FactoryCell.create(4, GameLogic.BLUE_PLAYER, GameLogic.DYING);
+
+    const updBoard = GameLogic.applyLife(board);        
+    expect(updBoard[25].id).toEqual(board[25].id);
+    expect(updBoard[25].state).toEqual(GameLogic.DYING);
+    expect(updBoard[25].player).toEqual(board[25].player);
+
+    for(const i in [4,5, 45]) {
+        expect(updBoard[i].id).toEqual(board[i].id);
+        expect(updBoard[i].state).toEqual(GameLogic.EMPTY);
+        expect(updBoard[i].player).toEqual(GameLogic.NO_PLAYER);
+    }    
+});
+
+test('one empty cell in surpopulation of living and dying cell, becomes red born after evolution', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.EMPTY);
+    board[24] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[44] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[45] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[26] = FactoryCell.create(45, GameLogic.BLUE_PLAYER, GameLogic.DYING);
+    board[6] = FactoryCell.create(4, GameLogic.RED_PLAYER, GameLogic.DYING);
+    board[5] = FactoryCell.create(4, GameLogic.BLUE_PLAYER, GameLogic.DYING);
+
+    const updBoard = GameLogic.applyLife(board);        
+    expect(updBoard[25].id).toEqual(board[25].id);
+    expect(updBoard[25].state).toEqual(GameLogic.BORN);
+    expect(updBoard[25].player).toEqual(GameLogic.RED_PLAYER);
+
+    for(const i in [5, 6, 26]) {
+        expect(updBoard[i].id).toEqual(board[i].id);
+        expect(updBoard[i].state).toEqual(GameLogic.EMPTY);
+        expect(updBoard[i].player).toEqual(GameLogic.NO_PLAYER);
+    }    
+
+    for(const i in [24, 44, 45]) {
+        expect(updBoard[i].id).toEqual(board[i].id);
+        expect(updBoard[i].state).toEqual(board[i].state);
+        expect(updBoard[i].player).toEqual(board[i].player);
+    }    
+});
+
+test('one empty cell in surpopulation of living and dying cell, becomes blue born after evolution', () => {
+    board[25] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.EMPTY);
+    board[24] = FactoryCell.create(25, GameLogic.BLUE_PLAYER, GameLogic.LIVING);
+    board[44] = FactoryCell.create(25, GameLogic.BLUE_PLAYER, GameLogic.LIVING);
+    board[45] = FactoryCell.create(25, GameLogic.RED_PLAYER, GameLogic.LIVING);
+    board[26] = FactoryCell.create(45, GameLogic.BLUE_PLAYER, GameLogic.DYING);
+    board[6] = FactoryCell.create(4, GameLogic.RED_PLAYER, GameLogic.DYING);
+    board[5] = FactoryCell.create(4, GameLogic.BLUE_PLAYER, GameLogic.DYING);
+
+    const updBoard = GameLogic.applyLife(board);        
+    expect(updBoard[25].id).toEqual(board[25].id);
+    expect(updBoard[25].state).toEqual(GameLogic.BORN);
+    expect(updBoard[25].player).toEqual(GameLogic.BLUE_PLAYER);
+
+    for(const i in [5, 6, 26]) {
+        expect(updBoard[i].id).toEqual(board[i].id);
+        expect(updBoard[i].state).toEqual(GameLogic.EMPTY);
+        expect(updBoard[i].player).toEqual(GameLogic.NO_PLAYER);
+    }    
+
+    for(const i in [24, 44, 45]) {
+        expect(updBoard[i].id).toEqual(board[i].id);
+        expect(updBoard[i].state).toEqual(board[i].state);
+        expect(updBoard[i].player).toEqual(board[i].player);
+    }    
 });
