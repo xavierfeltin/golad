@@ -1,9 +1,9 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
-import { EndPlayerTurn, SetPlayerRemainingActions, NextTurn, NextPlayerTurn, EndGame, SetHalfCell, TurnReset, RestoreTurn } from '../actions/turn.action';
+import { NextMove, SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell, TurnReset, RestoreTurn } from '../actions/turn.action';
 import { GameLogic } from '../engine/logic';
-import { SetScore } from '../actions/players.action';
-import { PlayerState } from './player.state';
 import { Cell } from '../models/cell.model';
+import { CleanSavePoints } from '../actions/savepoint.action';
+import { BeginMoveRendering } from '../actions/ui.action';
 
 export class TurnStateModel {
     public nbTurn: number;
@@ -19,7 +19,7 @@ export class TurnStateModel {
     name: 'turn',
     defaults: {
         nbTurn: 0,
-        currentPlayer: GameLogic.BLUE_PLAYER,
+        currentPlayer: GameLogic.NO_PLAYER,
         isPlayerEndOfTurn: false,
         isEndOfTurn: false,
         remainingActions: 1,
@@ -50,20 +50,35 @@ export class TurnState {
         return state.halfCell;
     }
 
-    @Action(EndPlayerTurn)
-    endPlayerTurn(ctx: StateContext<TurnStateModel>) {        
+    @Action(NextMove)
+    nextMove(ctx: StateContext<TurnStateModel>) {        
         const turn= ctx.getState();
-        
-        //Finalize player turn            
-        ctx.patchState({
-            nbTurn: turn.nbTurn,
-            currentPlayer: turn.currentPlayer,
-            isPlayerEndOfTurn: true,
-            isEndOfTurn: turn.isEndOfTurn,
-            remainingActions: turn.remainingActions,
-            isEndOfGame: turn.isEndOfGame,
-            halfCell: turn.halfCell
-        });      
+        const isPlayerEndOfTurn = (turn.remainingActions == 0);
+
+        if (GameLogic.NO_PLAYER == turn.currentPlayer) {
+            //Finalize initialization
+            ctx.patchState({
+                nbTurn: 0,
+                currentPlayer: GameLogic.BLUE_PLAYER,
+                isPlayerEndOfTurn: false,
+                isEndOfTurn: false,
+                remainingActions: 1,
+                isEndOfGame: false,
+                halfCell: null
+            }); 
+        }
+        else {
+            //Finalize player turn            
+            ctx.patchState({
+                nbTurn: turn.nbTurn,
+                currentPlayer: turn.currentPlayer,
+                isPlayerEndOfTurn: isPlayerEndOfTurn,
+                isEndOfTurn: turn.isEndOfTurn,
+                remainingActions: turn.remainingActions,
+                isEndOfGame: turn.isEndOfGame,
+                halfCell: turn.halfCell
+            }); 
+        }                         
     }
 
     @Action(NextPlayerTurn)
@@ -75,30 +90,28 @@ export class TurnState {
                 nbTurn: turn.nbTurn,
                 currentPlayer: GameLogic.RED_PLAYER,
                 isPlayerEndOfTurn: false,
-                isEndOfTurn: turn.isEndOfTurn,
+                isEndOfTurn: false,
                 remainingActions: 1,
                 isEndOfGame: turn.isEndOfGame,
                 halfCell: turn.halfCell
             });    
         }
         else {
-            ctx.dispatch(new NextTurn());
+            //ctx.dispatch(new NextTurn());
+            ctx.patchState({
+                nbTurn: turn.nbTurn + 1,
+                currentPlayer: GameLogic.BLUE_PLAYER,
+                isPlayerEndOfTurn: false,
+                isEndOfTurn: false,
+                remainingActions: 1,
+                isEndOfGame: turn.isEndOfGame,
+                halfCell: turn.halfCell
+            });        
         }
-    }
+        ctx.dispatch(new CleanSavePoints());        
 
-
-    @Action(NextTurn)
-    nextTurn(ctx: StateContext<TurnStateModel>) {        
-        const turn= ctx.getState();
-        ctx.patchState({
-            nbTurn: turn.nbTurn + 1,
-            currentPlayer: GameLogic.BLUE_PLAYER,
-            isPlayerEndOfTurn: false,
-            isEndOfTurn: false,
-            remainingActions: 1,
-            isEndOfGame: turn.isEndOfGame,
-            halfCell: turn.halfCell
-        });
+        console.log('next player turn');
+        ctx.dispatch(new BeginMoveRendering);
     }
 
     @Action(SetPlayerRemainingActions)
@@ -114,19 +127,20 @@ export class TurnState {
             isEndOfGame: turn.isEndOfGame
         });
 
-        if (nbActions == 0) {
-            ctx.dispatch(new EndPlayerTurn());
-        }
+        console.log('set remaining actions');
+        ctx.dispatch(new BeginMoveRendering);
     }
 
     @Action(EndGame)
     endGame(ctx: StateContext<TurnStateModel>, { winner} : EndGame) {
-        const turn= ctx.getState();
-        const players = this.store.selectSnapshot(PlayerState.getPlayers);
+        const turn= ctx.getState();        
 
+        /*
+        const players = this.store.selectSnapshot(PlayerState.getPlayers);
         if (winner != GameLogic.NO_PLAYER) {
             ctx.dispatch( new SetScore(winner, players[winner].score, true));   
         }
+        */
         
         ctx.patchState({
             nbTurn: turn.nbTurn,

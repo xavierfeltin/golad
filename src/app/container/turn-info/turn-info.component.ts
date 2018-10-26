@@ -23,6 +23,10 @@ export class TurnInfoComponent implements OnInit {
   ngOnInit() {
   }
 
+  isGameInitialized() {
+    return this.turn.currentPlayer != GameLogic.NO_PLAYER;
+  }
+
   isBluePlayer() {
     return this.turn.currentPlayer == GameLogic.BLUE_PLAYER;
   }

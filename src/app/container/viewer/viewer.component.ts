@@ -3,6 +3,8 @@ import { GameLogic } from '../../engine/logic';
 import { Game } from '../../engine/game';
 import { Cell } from '../../models/cell.model';
 import { PickingInfo } from 'babylonjs';
+import { BoardStateModel } from '../../state/board.state';
+import { UIStateModel } from '../../state/ui.state';
 
 @Component({
   selector: 'app-viewer',
@@ -13,8 +15,10 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   private game: Game;
 
   @Input() size: number = 0;  
-  @Input() board: Cell[] = [];  
+  @Input() board: BoardStateModel = null;  
+  @Input() isRendering: UIStateModel = null;  
   @Output() pickObject = new EventEmitter();  
+  @Output() finishRendering = new EventEmitter();
 
   constructor() {
   }
@@ -33,13 +37,16 @@ export class ViewerComponent implements OnInit, AfterViewInit {
 
   ngOnChanges(changes) {    
     if (this.game) {
-
-      if (changes.size) {
-        this.game.createBoard(changes.size);
+      if (changes.size && changes.size.currentValue != changes.size.oldValue) {
+        this.game.createBoard(this.board).then(() => {
+          this.finishRendering.emit();
+        });  
       }
-      
-      if (changes.board) {
-        this.game.updateBoard(changes.board.currentValue);
+        
+      if (changes.isRendering && changes.isRendering.currentValue.isMoveRendering === true) {        
+        this.game.updateBoard(this.board).then(() => {
+          this.finishRendering.emit();
+        });  
       }
     } 
   }

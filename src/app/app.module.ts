@@ -15,6 +15,7 @@ import { PlayersInfoComponent } from './container/players-info/players-info.comp
 import { ConfigGameComponent } from './container/config-game/config-game.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SavePointState } from './state/savepoint.state';
+import { UIState } from './state/ui.state';
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import { SavePointState } from './state/savepoint.state';
       BoardState,
       TurnState,
       PlayerState,
-      SavePointState
+      SavePointState,
+      UIState
     ]),
   ],
   providers: [],

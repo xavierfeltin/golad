@@ -4,6 +4,7 @@ import { AddSave, RemoveLastSave, RestoreLastTurn, CleanSavePoints } from '../ac
 import { RestoreTurn } from '../actions/turn.action';
 import { RestoreBoard } from '../actions/board.action';
 import { RestorePlayer } from '../actions/players.action';
+import { BeginMoveRendering } from '../actions/ui.action';
 
 export class SavePointStateModel {
     savepoints: Save[];
@@ -59,6 +60,7 @@ export class SavePointState {
         ctx.dispatch( new RestoreBoard(last.board));
         ctx.dispatch( new RestorePlayer(last.player));
         ctx.dispatch( new RemoveLastSave());
+        ctx.dispatch(new BeginMoveRendering());
     }
 
     @Action(CleanSavePoints)

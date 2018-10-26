@@ -6,23 +6,37 @@ import { SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell } from 
 import { TurnState } from './turn.state';
 import { SetScore } from '../actions/players.action';
 import { PlayerState } from './player.state';
-import { AddSave, CleanSavePoints } from '../actions/savepoint.action';
+import { AddSave } from '../actions/savepoint.action';
+import { Move, FactoryMove } from '../models/move.model';
+import { FactoryBoardCells } from '../models/board.model';
 
 export class BoardStateModel {
     public size: number;
     public cells: Cell[];
+    public lastMove: Move;
 }
 
 @State<BoardStateModel> ({
     name: 'board',
     defaults: {
        size: 0,
-       cells: []
+       cells: [],
+       lastMove: null
     }
 })
 export class BoardState {
 
     constructor(private store: Store) {}
+
+    @Selector()
+    static getBoardCells(state: BoardStateModel) {
+        return state.cells; 
+    }
+
+    @Selector()
+    static getBoard(state: BoardStateModel) {
+        return state; 
+    }
 
     @Action(CreateBoard)
     createBoard(ctx: StateContext<BoardStateModel>, { size }: CreateBoard) {
@@ -47,15 +61,17 @@ export class BoardState {
         }
 
         ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, false));   
-        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, false)); 
+        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, false));         
     }
 
     @Action(AttributeCell)
     attributeCell(ctx: StateContext<BoardStateModel>, { cell }: AttributeCell) {
         const board = ctx.getState();
+
         const playerRemainingActions = this.store.selectSnapshot(TurnState.getRemainingActions);
         let halfCell = FactoryCell.copy(this.store.selectSnapshot(TurnState.getHalfCell));
         const currentPlayer = this.store.selectSnapshot(TurnState.getCurrentPlayer);
+        const players = this.store.selectSnapshot(PlayerState.getPlayers);
         let scores = this.store.selectSnapshot(PlayerState.scores);
 
         let saveCells = [];
@@ -71,7 +87,7 @@ export class BoardState {
                                 );
 
         if (isApplyPicking) {
-            let updatedBoard = board.cells.map(c => FactoryCell.copy(c));
+            let updatedBoard = FactoryBoardCells.copy(board.cells);
 
             // Update picked cell
             const pickedCell = GameLogic.updatePickedCell(cell, currentPlayer, updatedBoard, board.size);
@@ -86,8 +102,9 @@ export class BoardState {
             }
 
             // Update neighbors
-            const neighborsCells = GameLogic.getNeighbors(cell, updatedBoard, board.size, GameLogic.MODE_ALL_NEIGHBORS);
-            saveCells.push(...neighborsCells.map(c => FactoryCell.copy(c)));
+            const neighborsCells = GameLogic.getNeighbors(cell, updatedBoard, board.size, GameLogic.MODE_ALL_NEIGHBORS);            
+            //saveCells.push(...neighborsCells.map(c => FactoryCell.copy(c)));
+            saveCells.push(...FactoryBoardCells.copy(neighborsCells));
 
             const updatedNeighbors = GameLogic.updatePickedNeighbors(neighborsCells, updatedBoard, board.size);
             for (const neighbor of updatedNeighbors) {
@@ -110,7 +127,8 @@ export class BoardState {
             //Update the board state
             ctx.patchState({
                 size: board.size,
-                cells: updatedBoard
+                cells: updatedBoard,
+                lastMove: FactoryMove.create(pickedCell, players[currentPlayer])
             });
             
             //Update the turn state
@@ -145,44 +163,8 @@ export class BoardState {
             Each cell with three neighbors becomes populated.
     */
     applyLife(ctx: StateContext<BoardStateModel>) {
-        const board = ctx.getState();
-        
-        /*
-        let updatedBoard = [...board.cells].map(c => FactoryCell.copy(c));
-        const cellsByType = GameLogic.getCellsByType(updatedBoard);
-        const newEmptyCells = GameLogic.evolveDyingCells(cellsByType[GameLogic.DYING]); //TODO if needed, split by solitude / overpopulation
-        
-        let countBlueCells = 0;
-        let countRedCells = 0;
 
-        for (const updCell of newEmptyCells) {
-            updatedBoard[updCell.id].state = updCell.state;
-            updatedBoard[updCell.id].player = updCell.player;
-        }
-
-        const newCells = GameLogic.evolveBornCells(cellsByType[GameLogic.BORN], updatedBoard, board.size);
-        let newLivingCells = newCells.filter((cell) => { return cell.state == GameLogic.LIVING});
-        let newDyingCells = newCells.filter((cell) => { return cell.state == GameLogic.DYING});
-
-        const newUpdCells = GameLogic.evolveLivingCells(cellsByType[GameLogic.LIVING], updatedBoard, board.size);
-        newLivingCells = newLivingCells.concat(newUpdCells.filter((cell) => { return cell.state == GameLogic.LIVING}));
-        newDyingCells = newDyingCells.concat(newUpdCells.filter((cell) => { return cell.state == GameLogic.DYING}));
-
-        for (const updCell of [...newLivingCells, ...newDyingCells]) {
-            updatedBoard[updCell.id].state = updCell.state;
-            updatedBoard[updCell.id].player = updCell.player;
-
-            if (updCell.player == GameLogic.BLUE_PLAYER) {countBlueCells ++;} else {countRedCells++;}
-        }
-
-        const newBornCells = GameLogic.evolveEmptyCells(cellsByType[GameLogic.EMPTY], updatedBoard, board.size);
-
-        for (const updCell of newBornCells) {
-            updatedBoard[updCell.id].state = updCell.state;
-            updatedBoard[updCell.id].player = updCell.player;
-        }
-        */
-
+        const board = ctx.getState();        
         const updatedBoard = GameLogic.applyLife(board.cells);
         const scores = GameLogic.getScore(updatedBoard);
         const countBlueCells = scores[GameLogic.BLUE_PLAYER];
@@ -190,7 +172,8 @@ export class BoardState {
 
         ctx.patchState({
             size: board.size,
-            cells: updatedBoard
+            cells: updatedBoard,
+            lastMove: null
         });
 
         let isBlueWinner = false;
@@ -211,8 +194,7 @@ export class BoardState {
         }
 
         ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, isBlueWinner));
-        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, isRedWinner));
-        ctx.dispatch(new CleanSavePoints());
+        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, isRedWinner));                
     }
 
     @Action(RestoreBoard)
@@ -227,7 +209,8 @@ export class BoardState {
 
         ctx.patchState({
             size: board.size,
-            cells: updatedBoard
-        });
+            cells: updatedBoard,
+            lastMove: FactoryMove.copy(board.lastMove)
+        });      
     }
 }

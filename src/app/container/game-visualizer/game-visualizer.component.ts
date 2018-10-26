@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Store, Select } from '@ngxs/store';
-import { Cell } from '../../models/cell.model';
 import { Observable } from 'rxjs';
 import { AttributeCell, ApplyLife } from '../../actions/board.action';
 import { Player } from '../../models/player.model';
@@ -8,6 +7,10 @@ import { PlayerState } from '../../state/player.state';
 import { TurnState, TurnStateModel } from '../../state/turn.state';
 import { SavePointState } from '../../state/savepoint.state';
 import { RestoreLastTurn } from '../../actions/savepoint.action';
+import { IAService } from '../../services/ia.service';
+import { BoardState, BoardStateModel } from '../../state/board.state';
+import { UIState, UIStateModel } from '../../state/ui.state';
+import { EndMoveRendering } from '../../actions/ui.action';
 
 @Component({
   selector: 'app-game-visualizer',
@@ -17,18 +20,24 @@ import { RestoreLastTurn } from '../../actions/savepoint.action';
 export class GameVisualizerComponent implements OnInit {
   
   @Select(state => state.board.size) size$: Observable<number>;
-  @Select(state => state.board.cells) cells$: Observable<Cell[]>;
+  @Select(BoardState.getBoard) board$: Observable<BoardStateModel>;
   @Select(PlayerState.getPlayers) players$: Observable<Player[]>;
   @Select(TurnState.getTurn) turn$: Observable<TurnStateModel>;
   @Select(SavePointState.getNbRestorePoints) nbSavePoints$: Observable<number>;
+  @Select(UIState.getUIRendering) isRendering$: Observable<UIStateModel>;
+
   pickedName: string = '';
 
-  constructor(private store: Store) {}
+  constructor(private store: Store, private iaService: IAService) {}
 
   ngOnInit() {}
 
   onPick(cell) {
     this.store.dispatch(new AttributeCell(cell)); //cell + player    
+  }
+
+  onFinishRendering() {    
+    this.store.dispatch(new EndMoveRendering()); //cell + player           
   }
   
   applyLife() {

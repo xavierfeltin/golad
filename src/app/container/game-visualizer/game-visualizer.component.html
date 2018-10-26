@@ -1,7 +1,11 @@
 <div class="layout">
     <app-players-info class="one" [players]="players$ | async"></app-players-info>
     <div class="game-area two">
-        <app-viewer (pickObject)="onPick($event)" [size]="size$ | async" [board]="cells$ | async"></app-viewer>
+        <app-viewer (pickObject)="onPick($event)" 
+            (finishRendering)="onFinishRendering($event)"
+            [size]="size$ | async" 
+            [board]="board$ | async"
+            [isRendering]="isRendering$ | async"></app-viewer>
     </div>
     <app-turn-info class="three" 
         (nextTurn)="applyLife()" 

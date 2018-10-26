@@ -1,10 +1,16 @@
 import {
     Engine, Scene, Light,
     Vector3, HemisphericLight,
-    FreeCamera, Texture
+    FreeCamera, Texture,
+    Animation, Mesh, AbstractMesh
 } from 'babylonjs';
+
+
+const ANIM_FRAMERATE = 10;
+
 import {Cell} from '../models/cell.model';
 import { GameLogic } from './logic';
+import { BoardStateModel } from '../state/board.state';
 
 export class Game {
     private canvas: HTMLCanvasElement;
@@ -13,6 +19,7 @@ export class Game {
     private camera: FreeCamera;
     private light: Light;
     private boardSize: number = 20;
+    private picker: Mesh;
 
     public static EMPTY: number = 0;
     public static BLUE_LIVING: number = 1;
@@ -55,17 +62,29 @@ export class Game {
         this.light = new HemisphericLight('skyLight', new Vector3(0, -1, 0), this.scene);        
 
         this.configureCamera();
+        this.createPicker();
         //this.displayBoardMultiMap();
     }
     
-    createBoard(size: number) {
-        const board = this.scene.getMeshByName('board');
-        if (board) {
-            this.scene.removeMesh(board, true);
+    async createBoard(board: BoardStateModel) {
+        const meshBoard = this.scene.getMeshByName('board');
+        if (meshBoard) {
+            this.scene.removeMesh(meshBoard, true);
         }
-        this.boardSize = size;
+        this.boardSize = board.size;
         this.configureCamera();
         this.displayBoardMultiMap();
+        this.updateBoard(board);
+    }
+
+    createPicker() {
+        this.picker = BABYLON.MeshBuilder.CreateSphere("picker", {diameter: 2, diameterX: 3}, this.scene);
+        this.picker.position = new BABYLON.Vector3(100.0, 10.0, -199.0);
+        this.picker.isVisible = true;
+
+        let whiteMat = new BABYLON.StandardMaterial("whiteMat", this.scene);
+	    whiteMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
+        this.picker.material = whiteMat;
     }
 
     configureCamera() {
@@ -129,33 +148,64 @@ export class Game {
         }            
     }
 
-    updateBoard(cells: Cell[]) {
-        const board = this.scene.getMeshByName('board');
+    async updateBoard(board: BoardStateModel) {
+        const meshBoard = this.scene.getMeshByName('board');
+        const initBluePos = new BABYLON.Vector3(150.0, 10.0, -190.0);
+        const initRedPos =  new BABYLON.Vector3(50.0, 10.0, -190.0);
+                
+        if (board.lastMove != null) {
+            const player = board.lastMove.player;
+            if (!player.human) {
+                this.setPickerPosition(player.name == 'Blue' ? initBluePos : initRedPos);
+                this.setPickerVisibility(true);                
+                const pickedId = board.lastMove.pickedCell.id;
+                const coordinate = GameLogic.getMatrixPositionFromId(pickedId, this.BOARD_SIZE);
+                const x = 200.0 - (coordinate[1] * this.CELL_SIZE) - this.CELL_SIZE/2.0;
+                const y = 10.0;
+                const z = -200.0 + (coordinate[0] * this.CELL_SIZE ) + this.CELL_SIZE/2.0;
+                let target = new BABYLON.Vector3(x, y, z);
+                await this.movePickerMesh(target);                
+            }
+            else {
+                this.setPickerVisibility(false);            
+            }
+        }        
+        this.updateCellsRendering(board.cells, meshBoard);
+
+        if (board.lastMove != null) {
+            const player = board.lastMove.player;
+            if (!player.human) {                
+                await this.movePickerMesh(player.name == 'Blue' ? initBluePos : initRedPos);
+            }
+        }
+    }
+
+    updateCellsRendering(cells: Cell[], meshBoard: AbstractMesh) {
         for(const cell of cells) {
             switch(cell.state) {
                 case(GameLogic.BORN): {
-                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_BORN : Game.RED_BORN; 
+                    meshBoard.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_BORN : Game.RED_BORN; 
                     break;}
                 case(GameLogic.DYING): {
-                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_DYING : Game.RED_DYING; 
+                    meshBoard.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_DYING : Game.RED_DYING; 
                     break;}
                 case(GameLogic.LIVING): {
-                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_LIVING : Game.RED_LIVING; 
+                    meshBoard.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.BLUE_LIVING : Game.RED_LIVING; 
                     break;}
                 case(GameLogic.NEW_CELL): {
-                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.NEW_BLUE_CELL : Game.NEW_RED_CELL; 
+                    meshBoard.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.NEW_BLUE_CELL : Game.NEW_RED_CELL; 
                     break;}     
                 case(GameLogic.NEW_CELL_DYING): {
-                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.NEW_BLUE_CELL_DYING : Game.NEW_RED_CELL_DYING; 
+                    meshBoard.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.NEW_BLUE_CELL_DYING : Game.NEW_RED_CELL_DYING; 
                     break;}                             
                 case(GameLogic.HALF_CELL): {
-                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.HALF_BLUE_CELL : Game.HALF_RED_CELL;
+                    meshBoard.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.HALF_BLUE_CELL : Game.HALF_RED_CELL;
                     break;}     
                 case(GameLogic.HALF_CELL_DYING): {
-                    board.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.HALF_BLUE_CELL_DYING : Game.HALF_RED_CELL_DYING;
+                    meshBoard.subMeshes[cell.id].materialIndex = (cell.player == GameLogic.BLUE_PLAYER) ? Game.HALF_BLUE_CELL_DYING : Game.HALF_RED_CELL_DYING;
                     break;}                       
                 default: {
-                    board.subMeshes[cell.id].materialIndex = GameLogic.EMPTY; 
+                    meshBoard.subMeshes[cell.id].materialIndex = GameLogic.EMPTY; 
                     break;}
             }            
         }
@@ -176,6 +226,43 @@ export class Game {
 
     getScene() {
         return this.scene;
+    }
+
+    translateAnim(): Animation {
+        return new Animation(
+          'pickerTranslate',
+          'position',
+          ANIM_FRAMERATE,
+          Animation.ANIMATIONTYPE_VECTOR3,
+          Animation.ANIMATIONLOOPMODE_CONSTANT,
+        );
+    }
+
+    movePickerMesh(position: Vector3): Promise<any> {
+        const picker = this.getPicker();
+        const trAnim = this.translateAnim();
+        trAnim.setKeys([
+          {frame: 0, value: picker.position},
+          {frame: 20, value: position},
+        ]);
+
+        return Promise.all([
+            this.scene.beginDirectAnimation(picker, [trAnim], 0, 20, false).waitAsync(),            
+        ]);
+    }
+
+    getPicker(): AbstractMesh {
+        return this.scene.getMeshByName('picker');
+    }
+
+    setPickerVisibility(isVisible: boolean) {
+        let picker = this.getPicker();
+        picker.isVisible = true;
+    }
+
+    setPickerPosition(pos: BABYLON.Vector3) {
+        let picker = this.getPicker();
+        picker.position = pos;
     }
 
     run(): void {

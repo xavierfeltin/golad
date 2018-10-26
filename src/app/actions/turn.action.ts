@@ -1,12 +1,8 @@
 import { Cell } from "../models/cell.model";
 import { TurnStateModel } from "../state/turn.state";
 
-export class EndPlayerTurn {
-    static readonly type = '[TURN] End Player Turn';    
-}
-
-export class NextTurn {
-    static readonly type = '[TURN] Next Turn';
+export class NextMove {
+    static readonly type = '[TURN] Next Move';    
 }
 
 export class NextPlayerTurn {
