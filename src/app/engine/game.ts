@@ -73,7 +73,10 @@ export class Game {
         this.boardSize = board.size;
         this.configureCamera();
         this.displayBoardMultiMap();
-        this.updateBoard(board);        
+        
+        //this.updateBoard(board);       
+        const meshBoard = this.scene.getMeshByName('board');
+        this.updateCellsRendering(board.cells, meshBoard);
     }
 
     resetBoard() {
@@ -158,7 +161,6 @@ export class Game {
     }
 
     async updateBoard(board: BoardStateModel) {
-        const meshBoard = this.scene.getMeshByName('board');
         const initBluePos = new BABYLON.Vector3(150.0, 10.0, -190.0);
         const initRedPos =  new BABYLON.Vector3(50.0, 10.0, -190.0);
         let target = BABYLON.Vector3.Zero();
@@ -191,6 +193,7 @@ export class Game {
             }
         }
        
+        /* => moved to endUpdateBoard
         this.updateCellsRendering(board.cells, meshBoard);
 
         if (board.lastMove != null) {
@@ -201,7 +204,30 @@ export class Game {
             }            
 
             this.lastPlayerRendered = board.lastMove.player.name;
-        }                
+        }          
+        */      
+    }
+
+    async endUpdateBoard(board: BoardStateModel) {
+        const meshBoard = this.scene.getMeshByName('board');
+        const initBluePos = new BABYLON.Vector3(150.0, 10.0, -190.0);
+        const initRedPos =  new BABYLON.Vector3(50.0, 10.0, -190.0);
+        let target = BABYLON.Vector3.Zero();        
+
+        this.updateCellsRendering(board.cells, meshBoard);
+
+        if (board.lastMove != null) {
+            const player = board.lastMove.player;            
+
+            if (!player.human) {                             
+                if (board.lastMove.remainingActions == 0) {           
+                    //Move picker from current position to target
+                    target = player.name == 'Blue' ? initBluePos : initRedPos;
+                    await this.movePickerMesh(this.getPicker().position, target);                                    
+                }                
+            }
+            this.lastPlayerRendered = board.lastMove.player.name;
+        } 
     }
 
     updateCellsRendering(cells: Cell[], meshBoard: AbstractMesh) {

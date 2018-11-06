@@ -19,6 +19,7 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   @Input() isRendering: UIStateModel = null;  
   @Output() pickObject = new EventEmitter();  
   @Output() finishMoveRendering = new EventEmitter();
+  @Output() reachedCellRendering = new EventEmitter();
   @Output() finishBoardRendering = new EventEmitter();
 
   constructor() {
@@ -40,11 +41,19 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     if (this.game) {
       if (changes.isRendering) {        
         if (changes.isRendering.currentValue.isMoveRendering === true) {
-          this.game.updateBoard(this.board).then(() => {
+          this.game.updateBoard(this.board)
+          .then(() => {
+            this.reachedCellRendering.emit();
+          })
+          .then(() => {
+            this.game.endUpdateBoard(this.board).then(() => {this.finishMoveRendering.emit();})
+          })
+          /*
+          .then(() => {
             this.finishMoveRendering.emit();
-          }); 
+          })*/; 
         }
-        else if (changes.isRendering.currentValue.isBoardRendering === true)  {
+        else if (changes.isRendering.currentValue.isBoardRendering === true)  {          
           this.game.createBoard(this.board).then(() => {
             this.finishBoardRendering.emit();
           });  

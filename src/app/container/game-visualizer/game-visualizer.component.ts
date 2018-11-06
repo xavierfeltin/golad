@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store, Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
-import { AttributeCell, ApplyLife } from '../../actions/board.action';
+import { AttributeCell, ApplyLife, UpdateScore } from '../../actions/board.action';
 import { Player } from '../../models/player.model';
 import { PlayerState } from '../../state/player.state';
 import { TurnState, TurnStateModel } from '../../state/turn.state';
@@ -34,6 +34,10 @@ export class GameVisualizerComponent implements OnInit {
 
   onPick(cell) {
     this.store.dispatch(new AttributeCell(cell)); //cell + player    
+  }
+
+  onReachedCellRendering() {        
+    this.store.dispatch(new UpdateScore());      
   }
 
   onFinishMoveRendering() {        

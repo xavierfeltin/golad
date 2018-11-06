@@ -7,7 +7,12 @@ export class SetName {
 
 export class SetScore {
     static readonly type = '[TURN] Set Score';
-    constructor(public player: number, public score: number, public isWinner: boolean) {}
+    constructor(public player: number, public score: number) {}
+}
+
+export class SetWinner {
+    static readonly type = '[TURN] Set Winner';
+    constructor(public player: number, public isWinner: boolean) {}
 }
 
 export class RestorePlayer {

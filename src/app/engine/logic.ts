@@ -395,7 +395,7 @@ export class GameLogic {
     public static getScore(board: Cell[]): number[] {
         let scores = Array(2).fill(0);
         for(const cell of board) {
-            if(GameLogic.isLivingCell(cell)) {
+            if(GameLogic.isLivingCell(cell) || GameLogic.isHalfCell(cell) || GameLogic.isNewCell(cell)) {
                 scores[cell.player]++;
             }
         }

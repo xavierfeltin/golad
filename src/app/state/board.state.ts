@@ -1,10 +1,10 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
-import { CreateBoard, AttributeCell, ApplyLife, RestoreBoard, BoardReset } from '../actions/board.action';
+import { CreateBoard, AttributeCell, ApplyLife, RestoreBoard, BoardReset, UpdateScore } from '../actions/board.action';
 import { Cell, FactoryCell } from '../models/cell.model';
 import { GameLogic } from '../engine/logic';
 import { SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell, ManageTurn } from '../actions/turn.action';
 import { TurnState } from './turn.state';
-import { SetScore } from '../actions/players.action';
+import { SetScore, SetWinner } from '../actions/players.action';
 import { PlayerState } from './player.state';
 import { AddSave } from '../actions/savepoint.action';
 import { Move, FactoryMove } from '../models/move.model';
@@ -64,8 +64,8 @@ import { GameState } from './game.state';
             }
         }
 
-        ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, false));   
-        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, false));           
+        ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells));   
+        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells));           
         ctx.dispatch(new ManageTurn());
     }
 
@@ -153,10 +153,24 @@ import { GameState } from './game.state';
             ctx.dispatch(new SetPlayerRemainingActions(remainingActions));    
 
             //Update the players
+            /*
             ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, scores[GameLogic.BLUE_PLAYER], false));   
             ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, scores[GameLogic.RED_PLAYER], false)); 
+            */
         }
         return board;        
+    }
+
+    @Action(UpdateScore)
+    updateScore(ctx: StateContext<BoardStateModel>) {
+        const board = ctx.getState();
+
+        const scores = GameLogic.getScore(board.cells);
+        const countBlueCells = scores[GameLogic.BLUE_PLAYER];
+        const countRedCells = scores[GameLogic.RED_PLAYER];
+
+        ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells));
+        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells));
     }
 
     @Action(ApplyLife)
@@ -175,11 +189,8 @@ import { GameState } from './game.state';
         const game = this.store.selectSnapshot(GameState.getGameState);
         if (!game.isGameOnGoing) { return board; }
         
-        const updatedBoard = GameLogic.applyLife(board.cells);
-        const scores = GameLogic.getScore(updatedBoard);
-        const countBlueCells = scores[GameLogic.BLUE_PLAYER];
-        const countRedCells = scores[GameLogic.RED_PLAYER];
-
+        const updatedBoard = GameLogic.applyLife(board.cells);        
+        
         ctx.patchState({
             id: board.id,
             size: board.size,
@@ -189,6 +200,10 @@ import { GameState } from './game.state';
 
         let isBlueWinner = false;
         let isRedWinner = false;
+        const scores = GameLogic.getScore(updatedBoard);
+        const countBlueCells = scores[GameLogic.BLUE_PLAYER];
+        const countRedCells = scores[GameLogic.RED_PLAYER];
+                
         if (countBlueCells == 0 && countRedCells == 0){
             ctx.dispatch(new EndGame(GameLogic.NO_PLAYER));
         }
@@ -204,10 +219,12 @@ import { GameState } from './game.state';
             ctx.dispatch(new NextPlayerTurn());
         }
 
-        ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells, isBlueWinner));
-        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells, isRedWinner));                
+        ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, countBlueCells));
+        ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, countRedCells));
+        ctx.dispatch(new SetWinner(GameLogic.BLUE_PLAYER, isBlueWinner));
+        ctx.dispatch(new SetWinner(GameLogic.RED_PLAYER, isRedWinner));
     }
-
+    
     @Action(RestoreBoard)
     restoreBoard(ctx: StateContext<BoardStateModel>, { cells }: RestoreBoard) {
         const board = ctx.getState();

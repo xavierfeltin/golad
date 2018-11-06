@@ -4,6 +4,8 @@ import { GameLogic } from '../engine/logic';
 import { Cell } from '../models/cell.model';
 import { CleanSavePoints } from '../actions/savepoint.action';
 import { BeginMoveRendering, BeginBoardRendering } from '../actions/ui.action';
+import { StopGame } from '../actions/game.action';
+import { GameStateModel } from './game.state';
 
 export class TurnStateModel {
     public nbTurn: number;
@@ -60,7 +62,10 @@ export class TurnState {
             //Play game
             ctx.dispatch(new NextMove);
         }
-        //else: end of game do nothing
+        else{
+            //End of game
+            ctx.dispatch(new StopGame(GameStateModel.STOP_DONE));            
+        } 
     }
 
     @Action(NextMove)

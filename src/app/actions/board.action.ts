@@ -14,6 +14,10 @@ export class ApplyLife {
     static readonly type = '[BOARD] Apply Live';
 }
 
+export class UpdateScore {
+    static readonly type = '[BOARD] Update Score';
+}
+
 export class RestoreBoard {
     static readonly type = '[TURN] Restore Board';
     constructor(public cells: Cell[]) {}

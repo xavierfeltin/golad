@@ -4,6 +4,7 @@
         <app-viewer (pickObject)="onPick($event)" 
             (finishMoveRendering)="onFinishMoveRendering($event)"
             (finishBoardRendering)="onFinishBoardRendering($event)"
+            (reachedCellRendering)="onReachedCellRendering($event)"
             [size]="size$ | async" 
             [board]="board$ | async"
             [isRendering]="isRendering$ | async"></app-viewer>
