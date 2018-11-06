@@ -14,3 +14,7 @@ export class RestorePlayer {
     static readonly type = '[TURN] Restore Player';
     constructor(public player: Player) {}
 }
+
+export class PlayerReset {
+    static readonly type = '[RESET] Player';    
+}

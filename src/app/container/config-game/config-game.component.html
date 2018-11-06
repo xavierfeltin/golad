@@ -1,14 +1,4 @@
 <div class="config">
   <h3> New Game </h3>
-  <!--app-game-state></app-game-state-->
-
-  <form [formGroup]="formConfig" (ngSubmit)="onSubmit(formConfig)" class="form-layout">
-    <label> Blue Player's name: </label> <input class="form-component" type="input" formControlName="blue_name"/>
-    <label> Red Player's name: </label> <input class="form-component" type="input" formControlName="red_name"/>
-    <div class="input-error" *ngIf="!formConfig.get('blue_name').valid || !formConfig.get('red_name').valid">
-      A name should have at least one character
-    </div>
-
-    <button class="validation-button" type="submit" [disabled]="!formConfig.valid" > New Game </button> 
-  </form>
+  <app-form-create-game [game]="game$ | async" [ia]="ia$ | async" (submitConfig)="onSubmit($event)" (gameStopped)="onGameStopped()"></app-form-create-game>
 </div>

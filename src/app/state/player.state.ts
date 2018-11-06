@@ -1,5 +1,5 @@
 import { State, Action, StateContext, Selector } from '@ngxs/store';
-import { SetName, SetScore, RestorePlayer } from '../actions/players.action';
+import { SetName, SetScore, RestorePlayer, PlayerReset } from '../actions/players.action';
 import { Player } from '../models/player.model';
 
 export class PlayerStateModel {
@@ -84,6 +84,16 @@ export class PlayerState {
 
         ctx.patchState({
             players: updPlayers
+        });
+    }
+
+    @Action(PlayerReset)
+    playerReset(ctx: StateContext<PlayerStateModel>) {
+        ctx.patchState({
+            players: [
+                {name: 'Blue', score: 0, isWinner: false, human: false},
+                {name: 'Red', score: 0, isWinner: false, human: false}
+            ]
         });
     }
 }

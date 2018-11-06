@@ -18,7 +18,8 @@ export class ViewerComponent implements OnInit, AfterViewInit {
   @Input() board: BoardStateModel = null;  
   @Input() isRendering: UIStateModel = null;  
   @Output() pickObject = new EventEmitter();  
-  @Output() finishRendering = new EventEmitter();
+  @Output() finishMoveRendering = new EventEmitter();
+  @Output() finishBoardRendering = new EventEmitter();
 
   constructor() {
   }
@@ -37,16 +38,17 @@ export class ViewerComponent implements OnInit, AfterViewInit {
 
   ngOnChanges(changes) {    
     if (this.game) {
-      if (changes.size && changes.size.currentValue != changes.size.oldValue) {
-        this.game.createBoard(this.board).then(() => {
-          this.finishRendering.emit();
-        });  
-      }
-        
-      if (changes.isRendering && changes.isRendering.currentValue.isMoveRendering === true) {        
-        this.game.updateBoard(this.board).then(() => {
-          this.finishRendering.emit();
-        });  
+      if (changes.isRendering) {        
+        if (changes.isRendering.currentValue.isMoveRendering === true) {
+          this.game.updateBoard(this.board).then(() => {
+            this.finishMoveRendering.emit();
+          }); 
+        }
+        else if (changes.isRendering.currentValue.isBoardRendering === true)  {
+          this.game.createBoard(this.board).then(() => {
+            this.finishBoardRendering.emit();
+          });  
+        }
       }
     } 
   }
@@ -88,7 +90,8 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     const cell: Cell = {
       id: pick.subMeshId,
       player: player,
-      state: state
+      state: state,
+      neighbors: GameLogic.getNeighborsIds(pick.subMeshId, 20)
     };
 
     return cell;

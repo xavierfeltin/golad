@@ -18,3 +18,7 @@ export class RestoreBoard {
     static readonly type = '[TURN] Restore Board';
     constructor(public cells: Cell[]) {}
 }
+
+export class BoardReset {
+    static readonly type = '[RESET] Board';    
+}

@@ -20,6 +20,7 @@ export class Game {
     private light: Light;
     private boardSize: number = 20;
     private picker: Mesh;
+    private lastPlayerRendered: string = '';
 
     public static EMPTY: number = 0;
     public static BLUE_LIVING: number = 1;
@@ -67,14 +68,22 @@ export class Game {
     }
     
     async createBoard(board: BoardStateModel) {
-        const meshBoard = this.scene.getMeshByName('board');
-        if (meshBoard) {
-            this.scene.removeMesh(meshBoard, true);
-        }
+        this.resetBoard();
+
         this.boardSize = board.size;
         this.configureCamera();
         this.displayBoardMultiMap();
-        this.updateBoard(board);
+        this.updateBoard(board);        
+    }
+
+    resetBoard() {
+        const meshBoard = this.scene.getMeshByName('board');
+        if (meshBoard) {
+            this.scene.removeMesh(meshBoard, true);
+            this.scene.stopAllAnimations();
+            this.setPickerPosition(new BABYLON.Vector3(150.0, 10.0, -190.0)); //initial blue position
+            this.setPickerVisibility(false);
+        }
     }
 
     createPicker() {
@@ -152,32 +161,47 @@ export class Game {
         const meshBoard = this.scene.getMeshByName('board');
         const initBluePos = new BABYLON.Vector3(150.0, 10.0, -190.0);
         const initRedPos =  new BABYLON.Vector3(50.0, 10.0, -190.0);
-                
+        let target = BABYLON.Vector3.Zero();
+        let initialPos = BABYLON.Vector3.Zero();
+
         if (board.lastMove != null) {
-            const player = board.lastMove.player;
-            if (!player.human) {
-                this.setPickerPosition(player.name == 'Blue' ? initBluePos : initRedPos);
-                this.setPickerVisibility(true);                
+            const player = board.lastMove.player;            
+
+            if (!player.human) {                              
+                initialPos = player.name == 'Blue' ? initBluePos : initRedPos;
+
+                //Reset picker position when changing player
+                if (this.lastPlayerRendered !== player.name) {                    
+                    this.setPickerVisibility(false);
+                    this.setPickerPosition(initialPos);
+                }
+
+                //Move picker from current position to target
+                this.setPickerVisibility(true);                                
                 const pickedId = board.lastMove.pickedCell.id;
                 const coordinate = GameLogic.getMatrixPositionFromId(pickedId, this.BOARD_SIZE);
                 const x = 200.0 - (coordinate[1] * this.CELL_SIZE) - this.CELL_SIZE/2.0;
                 const y = 10.0;
                 const z = -200.0 + (coordinate[0] * this.CELL_SIZE ) + this.CELL_SIZE/2.0;
-                let target = new BABYLON.Vector3(x, y, z);
-                await this.movePickerMesh(target);                
+                target = new BABYLON.Vector3(x, y, z);
+                await this.movePickerMesh(this.getPicker().position, target);                
             }
             else {
                 this.setPickerVisibility(false);            
             }
-        }        
+        }
+       
         this.updateCellsRendering(board.cells, meshBoard);
 
         if (board.lastMove != null) {
             const player = board.lastMove.player;
-            if (!player.human) {                
-                await this.movePickerMesh(player.name == 'Blue' ? initBluePos : initRedPos);
-            }
-        }
+            
+            if (!player.human && board.lastMove.remainingActions == 0) {                
+                await this.movePickerMesh(target, initialPos);
+            }            
+
+            this.lastPlayerRendered = board.lastMove.player.name;
+        }                
     }
 
     updateCellsRendering(cells: Cell[], meshBoard: AbstractMesh) {
@@ -238,17 +262,26 @@ export class Game {
         );
     }
 
-    movePickerMesh(position: Vector3): Promise<any> {
+    movePickerMesh(initial: Vector3, position: Vector3): Promise<any> {
         const picker = this.getPicker();
         const trAnim = this.translateAnim();
+
+        const distance = this.computeEuclidianDistance(initial, position);
+        const speed = 10;
+        const lastFrame = Math.max(Math.ceil(distance/speed),1);
+        
         trAnim.setKeys([
           {frame: 0, value: picker.position},
-          {frame: 20, value: position},
+          {frame: lastFrame, value: position},
         ]);
 
         return Promise.all([
             this.scene.beginDirectAnimation(picker, [trAnim], 0, 20, false).waitAsync(),            
         ]);
+    }
+
+    computeEuclidianDistance(p1: Vector3, p2: Vector3): number {
+        return Math.sqrt((p1.x - p2.x)**2 + (p1.z - p2.z)**2)
     }
 
     getPicker(): AbstractMesh {
@@ -263,6 +296,32 @@ export class Game {
     setPickerPosition(pos: BABYLON.Vector3) {
         let picker = this.getPicker();
         picker.position = pos;
+    }
+
+    matchGameAndLogic(material: number): number[] {
+        const redCells = [Game.RED_LIVING, Game.RED_DYING, Game.NEW_RED_CELL, Game.HALF_RED_CELL, Game.RED_BORN];
+        const blueCells = [Game.BLUE_LIVING, Game.BLUE_DYING, Game.NEW_BLUE_CELL, Game.HALF_BLUE_CELL, Game.BLUE_BORN];
+        let player = GameLogic.NO_PLAYER;
+        let state = GameLogic.EMPTY;
+
+        if(redCells.includes(material)) {
+          player = GameLogic.RED_PLAYER;
+          if (material == Game.RED_LIVING) {state = GameLogic.LIVING;}
+          else if (material == Game.RED_DYING) {state = GameLogic.DYING;}
+          else if (material == Game.NEW_RED_CELL) {state = GameLogic.NEW_CELL;}
+          else if (material == Game.RED_BORN) {state = GameLogic.BORN;}
+          else {material = GameLogic.HALF_CELL;}
+        }
+        else if (blueCells.includes(material)) {
+          player = GameLogic.BLUE_PLAYER;
+          if (material == Game.BLUE_LIVING) {state = GameLogic.LIVING;}
+          else if (material == Game.BLUE_DYING) {state = GameLogic.DYING;}
+          else if (material == Game.NEW_BLUE_CELL) {state = GameLogic.NEW_CELL;}
+          else if (material == Game.BLUE_BORN) {state = GameLogic.BORN;}
+          else {material = GameLogic.HALF_CELL;}
+        }
+
+        return [state, player];
     }
 
     run(): void {

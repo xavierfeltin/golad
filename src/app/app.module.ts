@@ -16,7 +16,9 @@ import { ConfigGameComponent } from './container/config-game/config-game.compone
 import { ReactiveFormsModule } from '@angular/forms';
 import { SavePointState } from './state/savepoint.state';
 import { UIState } from './state/ui.state';
-
+import { IAState } from './state/ia.state';
+import { GameState } from './state/game.state';
+import { FormCreateGameComponent } from './container/form-create-game/form-create-game.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +29,8 @@ import { UIState } from './state/ui.state';
     GameVisualizerComponent,
     TurnInfoComponent,
     PlayersInfoComponent,
-    ConfigGameComponent
+    ConfigGameComponent,
+    FormCreateGameComponent
   ],
   imports: [
     BrowserModule,
@@ -38,7 +41,9 @@ import { UIState } from './state/ui.state';
       TurnState,
       PlayerState,
       SavePointState,
-      UIState
+      UIState,
+      IAState,
+      GameState
     ]),
   ],
   providers: [],

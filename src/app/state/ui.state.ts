@@ -1,22 +1,20 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
-import { BeginMoveRendering, EndMoveRendering, BeginLifeRendering, EndLifeRendering } from '../actions/ui.action';
-import { NextMove } from '../actions/turn.action';
+import { BeginMoveRendering, EndMoveRendering, BeginBoardRendering, EndBoardRendering, UIReset } from '../actions/ui.action';
+import { ManageTurn, NextMove } from '../actions/turn.action';
 
 export class UIStateModel {
     public isMoveRendering: boolean;
-    public isLifeRendering: boolean;
+    public isBoardRendering: boolean;
 }
 
 @State<UIStateModel> ({
     name: 'ui',
     defaults: {
        isMoveRendering: false,
-       isLifeRendering: false
+       isBoardRendering: false
     }
 })
 export class UIState {
-
-    constructor(private store: Store) {}
 
     @Selector()
     static getUIRendering(state: UIStateModel) {
@@ -24,15 +22,15 @@ export class UIState {
     }
 
     @Selector()
-    static getLifeRendering(state: UIStateModel) {
-        return state.isLifeRendering;
+    static getBoardRendering(state: UIStateModel) {
+        return state.isBoardRendering;
     }
 
     @Action(BeginMoveRendering)
-    beginMoveRendering(ctx: StateContext<UIStateModel>) {            
+    beginMoveRendering(ctx: StateContext<UIStateModel>) { 
         ctx.patchState({
             isMoveRendering: true,
-            isLifeRendering: false
+            isBoardRendering: false
         });
     }
 
@@ -40,25 +38,33 @@ export class UIState {
     endMoveRendering(ctx: StateContext<UIStateModel>) {        
         ctx.patchState({
             isMoveRendering: false,
-            isLifeRendering: false
+            isBoardRendering: false
         });        
-
-        this.store.dispatch(new NextMove());
+        ctx.dispatch(new ManageTurn());
     }
 
-    @Action(BeginLifeRendering)
-    beginLifeRendering(ctx: StateContext<UIStateModel>) {        
+    @Action(BeginBoardRendering)
+    BeginBoardRendering(ctx: StateContext<UIStateModel>) {      
         ctx.patchState({
             isMoveRendering: false,
-            isLifeRendering: true
+            isBoardRendering: true
         });
     }
 
-    @Action(EndLifeRendering)
-    endLifeRendering(ctx: StateContext<UIStateModel>) {        
+    @Action(EndBoardRendering)
+    endBoardRendering(ctx: StateContext<UIStateModel>) {        
         ctx.patchState({
             isMoveRendering: false,
-            isLifeRendering: false
+            isBoardRendering: false
+        });
+        ctx.dispatch(new ManageTurn(true));
+    }
+
+    @Action(UIReset)
+    uiReset(ctx: StateContext<UIStateModel>) {        
+        ctx.patchState({
+            isMoveRendering: false,
+            isBoardRendering: false
         });
     }
 }

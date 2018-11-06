@@ -10,7 +10,7 @@ import { RestoreLastTurn } from '../../actions/savepoint.action';
 import { IAService } from '../../services/ia.service';
 import { BoardState, BoardStateModel } from '../../state/board.state';
 import { UIState, UIStateModel } from '../../state/ui.state';
-import { EndMoveRendering } from '../../actions/ui.action';
+import { EndMoveRendering, EndBoardRendering } from '../../actions/ui.action';
 
 @Component({
   selector: 'app-game-visualizer',
@@ -36,10 +36,14 @@ export class GameVisualizerComponent implements OnInit {
     this.store.dispatch(new AttributeCell(cell)); //cell + player    
   }
 
-  onFinishRendering() {    
+  onFinishMoveRendering() {        
     this.store.dispatch(new EndMoveRendering()); //cell + player           
   }
-  
+
+  onFinishBoardRendering() {     
+    this.store.dispatch(new EndBoardRendering()); //board
+  }
+    
   applyLife() {
     this.store.dispatch(new ApplyLife());    
   }

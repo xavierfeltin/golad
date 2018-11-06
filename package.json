@@ -24,6 +24,7 @@
     "@angular/platform-browser-dynamic": "^6.1.0",
     "@angular/router": "^6.1.0",
     "@ngxs/store": "^3.2.0",
+    "@types/uuid": "^3.4.4",
     "babylonjs": "^3.3.0",
     "cannon": "^0.6.2",
     "core-js": "^2.5.4",

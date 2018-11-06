@@ -1,9 +1,9 @@
 import { State, Action, StateContext, Selector, Store } from '@ngxs/store';
-import { NextMove, SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell, TurnReset, RestoreTurn } from '../actions/turn.action';
+import { NextMove, SetPlayerRemainingActions, NextPlayerTurn, EndGame, SetHalfCell, TurnReset, RestoreTurn, ManageTurn } from '../actions/turn.action';
 import { GameLogic } from '../engine/logic';
 import { Cell } from '../models/cell.model';
 import { CleanSavePoints } from '../actions/savepoint.action';
-import { BeginMoveRendering } from '../actions/ui.action';
+import { BeginMoveRendering, BeginBoardRendering } from '../actions/ui.action';
 
 export class TurnStateModel {
     public nbTurn: number;
@@ -23,13 +23,12 @@ export class TurnStateModel {
         isPlayerEndOfTurn: false,
         isEndOfTurn: false,
         remainingActions: 1,
-        isEndOfGame: false,
+        isEndOfGame: false, //game is over        
         halfCell: null
     }
 })
 export class TurnState {
-    constructor(private store: Store) {}
-
+    
     @Selector()
     static getTurn(state: TurnStateModel) {
         return state;  
@@ -50,12 +49,26 @@ export class TurnState {
         return state.halfCell;
     }
 
+    @Action(ManageTurn)
+    manageTurn(ctx: StateContext<TurnStateModel>, { forceStart} : ManageTurn) {        
+        const turn= ctx.getState();        
+        if(GameLogic.NO_PLAYER == turn.currentPlayer && !forceStart) {
+            //Finalize initialization            
+            ctx.dispatch(new BeginBoardRendering);
+        }        
+        else if(!turn.isEndOfGame) {
+            //Play game
+            ctx.dispatch(new NextMove);
+        }
+        //else: end of game do nothing
+    }
+
     @Action(NextMove)
     nextMove(ctx: StateContext<TurnStateModel>) {        
         const turn= ctx.getState();
         const isPlayerEndOfTurn = (turn.remainingActions == 0);
 
-        if (GameLogic.NO_PLAYER == turn.currentPlayer) {
+        if (GameLogic.NO_PLAYER == turn.currentPlayer) {            
             //Finalize initialization
             ctx.patchState({
                 nbTurn: 0,
@@ -108,9 +121,7 @@ export class TurnState {
                 halfCell: turn.halfCell
             });        
         }
-        ctx.dispatch(new CleanSavePoints());        
-
-        console.log('next player turn');
+        ctx.dispatch(new CleanSavePoints());                
         ctx.dispatch(new BeginMoveRendering);
     }
 
@@ -120,14 +131,13 @@ export class TurnState {
         ctx.patchState({
             nbTurn: turn.nbTurn,
             currentPlayer: turn.currentPlayer,
-            isPlayerEndOfTurn: turn.isPlayerEndOfTurn,
+            isPlayerEndOfTurn: nbActions == 0,//turn.isPlayerEndOfTurn,
             isEndOfTurn: turn.isEndOfTurn,
             remainingActions: nbActions,
             halfCell: turn.halfCell,
             isEndOfGame: turn.isEndOfGame
         });
 
-        console.log('set remaining actions');
         ctx.dispatch(new BeginMoveRendering);
     }
 
@@ -135,13 +145,6 @@ export class TurnState {
     endGame(ctx: StateContext<TurnStateModel>, { winner} : EndGame) {
         const turn= ctx.getState();        
 
-        /*
-        const players = this.store.selectSnapshot(PlayerState.getPlayers);
-        if (winner != GameLogic.NO_PLAYER) {
-            ctx.dispatch( new SetScore(winner, players[winner].score, true));   
-        }
-        */
-        
         ctx.patchState({
             nbTurn: turn.nbTurn,
             currentPlayer: turn.currentPlayer,
@@ -151,6 +154,8 @@ export class TurnState {
             halfCell: turn.halfCell,
             remainingActions: 0
         });
+
+        ctx.dispatch(new BeginMoveRendering);
     }
 
     @Action(SetHalfCell)
@@ -170,17 +175,22 @@ export class TurnState {
 
     @Action(TurnReset)
     reset(ctx: StateContext<TurnStateModel>) {
-        const turn= ctx.getState();
-        
         ctx.patchState({
             nbTurn: 0,
-            currentPlayer: GameLogic.BLUE_PLAYER,
+            currentPlayer: GameLogic.NO_PLAYER,
             isPlayerEndOfTurn: false,
             isEndOfTurn: false,
             isEndOfGame: false,
             halfCell: null,
             remainingActions: 1
         });
+
+        /*
+        this.store.dispatch(new PlayerReset());
+        this.store.dispatch(new BoardReset());
+        this.store.dispatch(new CleanSavePoints());
+        this.store.dispatch(new UIReset());
+        */
     }
 
     @Action(RestoreTurn)

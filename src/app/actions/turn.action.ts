@@ -1,6 +1,11 @@
 import { Cell } from "../models/cell.model";
 import { TurnStateModel } from "../state/turn.state";
 
+export class ManageTurn {
+    static readonly type = '[TURN] Manage Turn';    
+    constructor( public forceStart: boolean = false) {}
+}
+
 export class NextMove {
     static readonly type = '[TURN] Next Move';    
 }
@@ -25,7 +30,7 @@ export class SetHalfCell {
 }
 
 export class TurnReset {
-    static readonly type = '[TURN] Turn Reset';
+    static readonly type = '[RESET] Turn Reset';
 }
 
 export class RestoreTurn {
