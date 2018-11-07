@@ -2,8 +2,8 @@
     <div class="turn-info"> 
         <ng-container *ngIf="isGameInitialized(); else initGame">
             <ng-container *ngIf="!turn.isEndOfGame; else endgame">    
-                <div> Turn: {{turn.nbTurn}} - <span [ngClass]="(isBluePlayer())?'blue-font':'red-font'"> {{displayPlayer(turn.currentPlayer)}} </span> is playing ! </div>
-                <div> 
+                <p> Turn: {{turn.nbTurn}} - <span [ngClass]="(isBluePlayer())?'blue-font':'red-font'"> {{displayPlayer(turn.currentPlayer)}} </span> is playing ! </p>                
+                <div *ngIf="isHuman()"> 
                     <button class="ui_element" (click)="undoTurn()" [disabled]="nbSavePoints == 0"> Undo ({{nbSavePoints}}) </button>
                     <button class="ui_element" (click)="applyLife()" [disabled]="!turn.isPlayerEndOfTurn"> Apply Life </button> 
                 </div>
@@ -12,7 +12,7 @@
     </div>
 
     <ng-template #initGame>
-        <div> Click on "New Game" to start ! </div>
+        <p> Click on "New Game" to start ! </p>
     </ng-template>
 
     <ng-template #endgame>

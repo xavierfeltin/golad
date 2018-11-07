@@ -1,6 +1,7 @@
 import { State, Action, StateContext, Selector } from '@ngxs/store';
-import { SetName, SetScore, RestorePlayer, PlayerReset, SetWinner } from '../actions/players.action';
+import { SetScore, RestorePlayer, PlayerReset, SetWinner, SetPlayer } from '../actions/players.action';
 import { Player } from '../models/player.model';
+import { GameLogic } from '../engine/logic';
 
 export class PlayerStateModel {
     players: Player[];
@@ -10,8 +11,8 @@ export class PlayerStateModel {
     name: 'players',
     defaults: {
         players: [
-            {name: 'Blue', score: 0, isWinner: false, human: false},
-            {name: 'Red', score: 0, isWinner: false, human: false}
+            {name: 'Blue', score: 0, isWinner: false, human: true},
+            {name: 'Red', score: 0, isWinner: false, human: true}
         ]
     }
 })
@@ -36,16 +37,17 @@ export class PlayerState {
         return [state.players[0].isWinner, state.players[1].isWinner];
     }
 
-    @Action(SetName)
-    setName(ctx: StateContext<PlayerStateModel>, { player, name }: SetName) {        
+    @Action(SetPlayer)
+    setPlayer(ctx: StateContext<PlayerStateModel>, { player, name, mode }: SetPlayer) {        
         const players = ctx.getState();
         const updPlayers = [...players.players];
+        const isHuman = (mode === GameLogic.HUMAN);
 
         updPlayers[player] = {                
             name: name,
             score: updPlayers[player].score,
             isWinner: updPlayers[player].isWinner,
-            human: updPlayers[player].human
+            human: isHuman
         }
             
         ctx.patchState({
@@ -108,8 +110,8 @@ export class PlayerState {
     playerReset(ctx: StateContext<PlayerStateModel>) {
         ctx.patchState({
             players: [
-                {name: 'Blue', score: 0, isWinner: false, human: false},
-                {name: 'Red', score: 0, isWinner: false, human: false}
+                {name: 'Blue', score: 0, isWinner: false, human: true},
+                {name: 'Red', score: 0, isWinner: false, human: true}
             ]
         });
     }

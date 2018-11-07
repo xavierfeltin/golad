@@ -1,8 +1,8 @@
 import { Player } from "../models/player.model";
 
-export class SetName {
-    static readonly type = '[CONFIGURATION] Set Name';
-    constructor(public player: number, public name: string) {}
+export class SetPlayer {
+    static readonly type = '[CONFIGURATION] Set Player';
+    constructor(public player: number, public name: string, public mode: string) {}
 }
 
 export class SetScore {

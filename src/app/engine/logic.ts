@@ -23,6 +23,9 @@ export class GameLogic {
     public static MODE_PICKING = 1;
     public static MODE_APPLY_LIFE = 2;
 
+    public static HUMAN = 'human';
+    public static IA = 'ia';
+
     //PUBLIC LOGIC FUNCTIONS
     public static isLivingCell(cell: Cell): boolean {
         return (cell.state == GameLogic.LIVING) || (cell.state == GameLogic.DYING); 

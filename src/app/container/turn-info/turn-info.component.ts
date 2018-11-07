@@ -27,6 +27,10 @@ export class TurnInfoComponent implements OnInit {
     return this.turn.currentPlayer != GameLogic.NO_PLAYER;
   }
 
+  isHuman() {    
+    return this.players[this.turn.currentPlayer].human;
+  }  
+
   isBluePlayer() {
     return this.turn.currentPlayer == GameLogic.BLUE_PLAYER;
   }

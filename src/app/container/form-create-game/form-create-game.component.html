@@ -1,6 +1,17 @@
 <form [formGroup]="formConfig" (ngSubmit)="onSubmit(formConfig)" class="form-layout">
-  <label> Blue Player's name: </label> <input class="form-component" type="input" formControlName="blue_name"/>
-  <label> Red Player's name: </label> <input class="form-component" type="input" formControlName="red_name"/>
+  <label> Blue Player: </label> <input class="form-component" type="input" formControlName="blue_name"/>
+  
+  <select id="blue_player_selection" name="blue_player_selection" class="form-component" size="1" formControlName="blue_player">
+    <option [value]="labelHuman" [selected]="true">Human</option>
+    <option [value]="labelIA" [selected]="false">Basic IA</option>
+  </select>
+
+  <label> Red Player: </label> <input class="form-component" type="input" formControlName="red_name"/>
+  <select id="red_player_selection" name="red_player_selection" class="form-component" size="1" formControlName="red_player">
+    <option [value]="labelHuman" [selected]="true">Human</option>
+    <option [value]="labelIA" [selected]="false">Basic IA</option>
+  </select>
+
   <div class="input-error" *ngIf="!formConfig.get('blue_name').valid || !formConfig.get('red_name').valid">
     A name should have at least one character
   </div>
