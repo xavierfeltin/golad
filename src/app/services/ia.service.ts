@@ -16,7 +16,7 @@ export class IAService {
 
   constructor(private store: Store, private actions$: Actions) {
     this.actions$.pipe(ofActionSuccessful(NextMove)).subscribe(() => {
-      this.delay(1).then(() => {
+      this.delay(1).then(() => { //Delay is used to allow the UI to finish rendering properly
         this.store.dispatch(new BeginProcessing());
         this.playIA();
         this.store.dispatch(new EndProcessing());

@@ -189,13 +189,6 @@ export class TurnState {
             halfCell: null,
             remainingActions: 1
         });
-
-        /*
-        this.store.dispatch(new PlayerReset());
-        this.store.dispatch(new BoardReset());
-        this.store.dispatch(new CleanSavePoints());
-        this.store.dispatch(new UIReset());
-        */
     }
 
     @Action(RestoreTurn)

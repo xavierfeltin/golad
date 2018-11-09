@@ -187,15 +187,12 @@ export class GameLogic {
         return updCell;
     }
 
-    //public static updatePickedNeighbors(neighbors: Cell[], board: Cell[], size: number): Cell[] {
     public static updatePickedNeighbors(neighbors: Cell[], board: Cell[], size: number) {
         // Update neighbors:
         // - If neighbor is empty and there are 3 neighbors, a new cell is born
         // - Else:
         //  if neighbor is supposed to be born, it disappear
         //  if neighbor is alive, it will die
-
-        //let updatedNeighbors = FactoryBoardCells.copy(neighbors);        
 
         for(let updCell of neighbors) {
             const idCell = updCell.id;                        
@@ -255,6 +252,7 @@ export class GameLogic {
         return row + column * boardSize ;
     }
 
+    //Generate a static board for test purposes
     public static getDefaultBoard(size: number): Cell[] {
         const boardSize = 20 * 20;
         let cells = [];
@@ -284,6 +282,7 @@ export class GameLogic {
         return cells;
     }
 
+    //Generate a random board to start a new game
     public static getRandomBoard(): Cell[] {
         const boardSize = 20 * 20;
         const nbCells = 150;
@@ -309,14 +308,7 @@ export class GameLogic {
             
             const neighborsCells = GameLogic.getNeighbors(cells[index], cells, 20, GameLogic.MODE_ALL_NEIGHBORS);
             
-            /*
-            const updatedNeighbors = GameLogic.updatePickedNeighbors(neighborsCells, cells, 20);
-            for (const neighbor of updatedNeighbors) {
-                cells[neighbor.id].state = neighbor.state;
-                cells[neighbor.id].player = neighbor.player;
-            }
-            */
-           GameLogic.updatePickedNeighbors(neighborsCells, cells, 20);
+            GameLogic.updatePickedNeighbors(neighborsCells, cells, 20);
 
             availableCells = availableCells.filter((val, j) => {return val != index});
             currentPlayer = (currentPlayer == GameLogic.BLUE_PLAYER) ? GameLogic.RED_PLAYER :GameLogic.BLUE_PLAYER;
@@ -325,21 +317,14 @@ export class GameLogic {
         return cells;
     }
 
+    //Evolve the cells to the next generation
     public static applyLife(board: Cell[]): Cell[] {
         const boardSize = 20;
         let updatedBoard = FactoryBoardCells.copy(board);
         
         const cellsByType = GameLogic.getCellsByType(updatedBoard);
         
-        /*
-        const newEmptyCells = GameLogic.evolveDyingCells(cellsByType[GameLogic.DYING]); //TODO if needed, split by solitude / overpopulation
-        
-        for (const updCell of newEmptyCells) {
-            updatedBoard[updCell.id].state = updCell.state;
-            updatedBoard[updCell.id].player = updCell.player;
-        }
-        */
-       GameLogic.evolveDyingCells(cellsByType[GameLogic.DYING], updatedBoard);
+        GameLogic.evolveDyingCells(cellsByType[GameLogic.DYING], updatedBoard);
 
         const newCells = GameLogic.evolveBornCells(cellsByType[GameLogic.BORN], updatedBoard, boardSize);
         let newLivingCells = newCells.filter((cell) => { return cell.state == GameLogic.LIVING});
@@ -353,20 +338,12 @@ export class GameLogic {
             updatedBoard[updCell.id].state = updCell.state;
             updatedBoard[updCell.id].player = updCell.player;            
         }
-
-        /*
-        const newBornCells = GameLogic.evolveEmptyCells(cellsByType[GameLogic.EMPTY], updatedBoard, boardSize);
-        for (const updCell of newBornCells) {
-            updatedBoard[updCell.id].state = updCell.state;
-            updatedBoard[updCell.id].player = updCell.player;
-        }
-        */
+        
         GameLogic.evolveEmptyCells(cellsByType[GameLogic.EMPTY], updatedBoard, boardSize);
 
         return updatedBoard;
     }
 
-    //private static evolveDyingCells(cells: Cell[]): Cell[] {
     private static evolveDyingCells(cells: Cell[], board: Cell[]) {
         for(const cell of cells) {
             board[cell.id].player = GameLogic.NO_PLAYER;
@@ -398,7 +375,6 @@ export class GameLogic {
         return updCells;
     }
 
-    //private static evolveEmptyCells(cells: Cell[], board: Cell[], size): Cell[] {
     private static evolveEmptyCells(cells: Cell[], board: Cell[], size: number) {
         for(const cell of cells) {       
             if (GameLogic.isCellConfortable(cell, board, size, GameLogic.MODE_APPLY_LIFE)) {

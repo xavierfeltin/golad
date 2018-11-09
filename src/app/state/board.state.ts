@@ -151,12 +151,6 @@ import { GameState } from './game.state';
                 }                                
             }        
             ctx.dispatch(new SetPlayerRemainingActions(remainingActions));    
-
-            //Update the players
-            /*
-            ctx.dispatch(new SetScore(GameLogic.BLUE_PLAYER, scores[GameLogic.BLUE_PLAYER], false));   
-            ctx.dispatch(new SetScore(GameLogic.RED_PLAYER, scores[GameLogic.RED_PLAYER], false)); 
-            */
         }
         return board;        
     }

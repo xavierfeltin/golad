@@ -103,6 +103,7 @@ export class Game {
         }
     }
 
+    //Picker used by IA player to show which cell it selected
     createPicker() {
         this.picker = BABYLON.MeshBuilder.CreateSphere("picker", {diameter: 2, diameterX: 3}, this.scene);
         this.picker.position = new BABYLON.Vector3(100.0, 10.0, -199.0);
@@ -113,7 +114,6 @@ export class Game {
     }
 
     configureCamera() {
-        // Create the camera
         const sizeBoard = this.boardSize * this.CELL_SIZE;
         const halfSizeBoard = sizeBoard/2.0;
         this.camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(halfSizeBoard, this.BOARD_SIZE, -halfSizeBoard), this.scene);
@@ -173,6 +173,7 @@ export class Game {
         }            
     }
 
+    //Start updating the board by moving the IA picker to the selected cell
     async updateBoard(board: BoardStateModel) {
         let target = BABYLON.Vector3.Zero();
         let initialPos = BABYLON.Vector3.Zero();
@@ -205,6 +206,7 @@ export class Game {
         }     
     }
 
+    //End updating the board by changing the materials and moving the IA picker to its original place if needed
     async endUpdateBoard(board: BoardStateModel) {
         let meshBoard = this.scene.getMeshByName('board');
         let target = BABYLON.Vector3.Zero();        
@@ -239,6 +241,7 @@ export class Game {
         }                 
     }
     
+    //Display the right material depending of the cell state
     updateCellsRendering(cells: Cell[], meshBoard: AbstractMesh) {
         for(const cell of cells) {
             switch(cell.state) {
@@ -333,6 +336,7 @@ export class Game {
         picker.position = pos;
     }
 
+    //Associate Game Logic information and 3D Game data
     matchGameAndLogic(material: number): number[] {
         const redCells = [Game.RED_LIVING, Game.RED_DYING, Game.NEW_RED_CELL, Game.HALF_RED_CELL, Game.RED_BORN];
         const blueCells = [Game.BLUE_LIVING, Game.BLUE_DYING, Game.NEW_BLUE_CELL, Game.HALF_BLUE_CELL, Game.BLUE_BORN];
@@ -374,6 +378,7 @@ export class Game {
         ]);                
     }
 
+    //Main 3D rendering loop
     run(): void {
         // Rendering loop
         this.engine.runRenderLoop(() => {
