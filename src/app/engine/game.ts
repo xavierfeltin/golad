@@ -305,7 +305,7 @@ export class Game {
         const trAnim = this.translateAnim();
 
         const distance = this.computeEuclidianDistance(initial, position);
-        const speed = 10;
+        const speed = 20;
         const lastFrame = Math.max(Math.ceil(distance/speed),1);
         
         trAnim.setKeys([
