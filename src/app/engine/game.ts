@@ -369,7 +369,7 @@ export class Game {
                 'disappearBoard', // anim name
                 board, // animated mesh
                 'visibility', // animated property
-                100, // speed
+                70, // speed
                 50, // total frames
                 1.0, // starting value
                 0.0, // target value

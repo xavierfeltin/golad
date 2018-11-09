@@ -33,40 +33,52 @@ export class BasicIA {
             
             const updCell = GameLogic.updatePickedCell(cell, playerId, tmpBoard, 20);
             tmpBoard[updCell.id].state = updCell.state;
-            tmpBoard[updCell.id].player = (updCell.state == GameLogic.EMPTY) ? GameLogic.NO_PLAYER : cell.player;
+            tmpBoard[updCell.id].player = updCell.player;
+            //tmpBoard[updCell.id].player = (updCell.state == GameLogic.EMPTY) ? GameLogic.NO_PLAYER : cell.player;
 
-            const neighbors = GameLogic.getNeighbors(updCell, board, 20, GameLogic.MODE_ALL_NEIGHBORS);
+            //const neighbors = GameLogic.getNeighbors(updCell, board, 20, GameLogic.MODE_ALL_NEIGHBORS);
+            const neighbors = GameLogic.getNeighbors(updCell, tmpBoard, 20, GameLogic.MODE_ALL_NEIGHBORS);
             GameLogic.updatePickedNeighbors(neighbors, tmpBoard, 20);
             
-            if (GameLogic.isNewCell(tmpBoard[updCell.id])) {                
+            if (GameLogic.isNewCell(tmpBoard[updCell.id])) {
                 for(let i = 0; i < 2; i++) {
                     const feedCellId = BasicIA.play(tmpBoard, playerId, player, updCell);
                     const updFeedCell = GameLogic.updatePickedCell(feedCellId, playerId, tmpBoard, 20);
                     tmpBoard[updFeedCell.id].state = updFeedCell.state;
                     tmpBoard[updFeedCell.id].player = updFeedCell.player;
 
-                    const neighbors = GameLogic.getNeighbors(updFeedCell, board, 20, GameLogic.MODE_ALL_NEIGHBORS);
+                    //const neighbors = GameLogic.getNeighbors(updFeedCell, board, 20, GameLogic.MODE_ALL_NEIGHBORS);
+                    const neighbors = GameLogic.getNeighbors(updFeedCell, tmpBoard, 20, GameLogic.MODE_ALL_NEIGHBORS);
                     GameLogic.updatePickedNeighbors(neighbors, tmpBoard, 20);
                 }
             }
 
             //Apply life at the end of the IA turn
             //Do not apply life when selecting feeding cells
-            if (halfCell == null) {tmpBoard = GameLogic.applyLife(tmpBoard);}
+            if (halfCell == null) {
+                tmpBoard = GameLogic.applyLife(tmpBoard);
+            }
             
             const scores = GameLogic.getScore(tmpBoard);
             solutions[cell.id] = scores[playerId] - scores[1-playerId];
         }
 
-        let maxId = -1;
+        //let maxId = -1;
         let maxScore = Number.NEGATIVE_INFINITY;
+        let allSolutions = [];
         for(const i of Object.keys(solutions)) {
             if(solutions[i] > maxScore) {
                 maxScore = solutions[i];
-                maxId = parseInt(i);
+                //maxId = parseInt(i);
+                allSolutions = [parseInt(i)];
+            }
+            else if (solutions[i] == maxScore) {
+                allSolutions.push(i);
             }
         }
-        
-        return board[maxId];        
+
+        const randomId = Math.floor(Math.random() * allSolutions.length);
+        return board[allSolutions[randomId]];
+        //return board[maxId];        
     }
 }

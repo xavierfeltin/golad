@@ -38,7 +38,7 @@ export class GameLogic {
     public static isCellConfortable(cell: Cell, board: Cell[], boardSize: number, mode: number): boolean {
         const neighbors = GameLogic.getNeighbors(cell, board, boardSize, mode);        
         
-        if (GameLogic.isLivingCell(cell) || this.isNewCell(cell) || this.isHalfCell(cell)) {
+        if (GameLogic.isLivingCell(cell) ||this.isNewCell(cell) || this.isHalfCell(cell)) {
             return (neighbors.length == GameLogic.NB_NEIGHBORS_LIVE || neighbors.length == GameLogic.NB_NEIGHBORS_BORN)
         }
         else {
@@ -253,7 +253,7 @@ export class GameLogic {
     }
 
     //Generate a static board for test purposes
-    public static getDefaultBoard(size: number): Cell[] {
+    public static getDefaultBoard(): Cell[] {
         const boardSize = 20 * 20;
         let cells = [];
         for (let i = 0; i < boardSize; i++) {
@@ -266,8 +266,12 @@ export class GameLogic {
             cells.push(cell);  
         }
 
-        const blueIdCells = [42, 43, 62, 63, 322, 323, 342, 343];
-        const redIdCells = [56, 57, 76, 77, 336, 337, 356, 357];
+        //const blueIdCells = [42, 43, 62, 63, 322, 323, 342, 343];
+        let blueIdCells = [42, 43, 44, 45, 46, 66, 86, 106, 126, 125, 124, 123, 122, 102, 82, 62];
+        blueIdCells = blueIdCells.concat([262, 263, 264, 265, 266, 286, 306, 326, 346, 345, 344, 343, 342, 322, 302, 282]);
+
+        let redIdCells = [53, 54, 55, 56, 57, 77, 97, 117, 137, 136, 135, 134, 133, 113, 93, 73];
+        redIdCells = redIdCells.concat([273, 274, 275, 276, 277, 297, 317, 337, 357, 356, 355, 354, 353, 333, 313, 293]);
         
         for(const id of blueIdCells) {
             cells[id].state = GameLogic.LIVING;
@@ -323,22 +327,27 @@ export class GameLogic {
         let updatedBoard = FactoryBoardCells.copy(board);
         
         const cellsByType = GameLogic.getCellsByType(updatedBoard);
-        
         GameLogic.evolveDyingCells(cellsByType[GameLogic.DYING], updatedBoard);
-
+        
         const newCells = GameLogic.evolveBornCells(cellsByType[GameLogic.BORN], updatedBoard, boardSize);
-        let newLivingCells = newCells.filter((cell) => { return cell.state == GameLogic.LIVING});
-        let newDyingCells = newCells.filter((cell) => { return cell.state == GameLogic.DYING});
+        for (const c of newCells) {
+            updatedBoard[c.id].state = c.state;
+            updatedBoard[c.id].player = c.player;            
+        }
+
+        //let newLivingCells = newCells.filter((cell) => { return cell.state == GameLogic.LIVING});
+        //let newDyingCells = newCells.filter((cell) => { return cell.state == GameLogic.DYING});
 
         const newUpdCells = GameLogic.evolveLivingCells(cellsByType[GameLogic.LIVING], updatedBoard, boardSize);
-        newLivingCells = newLivingCells.concat(newUpdCells.filter((cell) => { return cell.state == GameLogic.LIVING}));
-        newDyingCells = newDyingCells.concat(newUpdCells.filter((cell) => { return cell.state == GameLogic.DYING}));
+        //newLivingCells = newLivingCells.concat(newUpdCells.filter((cell) => { return cell.state == GameLogic.LIVING}));
+        //newDyingCells = newDyingCells.concat(newUpdCells.filter((cell) => { return cell.state == GameLogic.DYING}));
 
-        for (const updCell of [...newLivingCells, ...newDyingCells]) {
-            updatedBoard[updCell.id].state = updCell.state;
-            updatedBoard[updCell.id].player = updCell.player;            
+        //for (const updCell of [...newLivingCells, ...newDyingCells]) {
+        for (const c of newUpdCells) {
+            updatedBoard[c.id].state = c.state;
+            updatedBoard[c.id].player = c.player;            
         }
-        
+
         GameLogic.evolveEmptyCells(cellsByType[GameLogic.EMPTY], updatedBoard, boardSize);
 
         return updatedBoard;
@@ -354,13 +363,10 @@ export class GameLogic {
     private static evolveBornCells(cells: Cell[], board: Cell[], size: number): Cell[] {
         let updCells = FactoryBoardCells.copy(cells);
         for(const cell of updCells) {      
-            cell.state = GameLogic.LIVING; //will be living, player is already decided
-            if (GameLogic.isCellConfortable(cell, board, size, GameLogic.MODE_APPLY_LIFE)) {
-                cell.state = GameLogic.LIVING;
-            }      
-            else {
+            cell.state = GameLogic.LIVING;
+            if (!GameLogic.isCellConfortable(cell, board, size, GameLogic.MODE_APPLY_LIFE)) {
                 cell.state = GameLogic.DYING;
-            }
+            } 
         }
         return updCells;
     }
@@ -388,7 +394,7 @@ export class GameLogic {
         let scores = Array(2).fill(0);
         for(const cell of board) {
             if(GameLogic.isLivingCell(cell) || GameLogic.isHalfCell(cell) || GameLogic.isNewCell(cell)) {
-                scores[cell.player]++;
+                if(cell.player != GameLogic.NO_PLAYER) {scores[cell.player]++;}
             }
         }
         return scores;

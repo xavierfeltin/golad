@@ -44,7 +44,7 @@ import { GameState } from './game.state';
 
     @Action(CreateBoard)
     createBoard(ctx: StateContext<BoardStateModel>, { size }: CreateBoard) {
-        const board = GameLogic.getRandomBoard();
+        const board = GameLogic.getDefaultBoard(); //GameLogic.getRandomBoard();
         
         ctx.patchState({
             id: uuid(),

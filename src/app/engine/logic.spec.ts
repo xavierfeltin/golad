@@ -474,3 +474,53 @@ test('one blue new cell then remove a blue to feed it, the new cell should not b
     expect(updatedHalfCell.state).toEqual(GameLogic.HALF_CELL_DYING);
     expect(updatedHalfCell.player).toEqual(GameLogic.BLUE_PLAYER);
 });
+
+test('one blue new cell close to a red square to open the formation', () => {
+    board[44] = FactoryCell.create(44, GameLogic.RED_PLAYER, GameLogic.LIVING, [43,63,64,65,45,25,24,23]);
+    board[45] = FactoryCell.create(45, GameLogic.RED_PLAYER, GameLogic.LIVING, [44,64,65,66,46,26,25,24]);
+    board[64] = FactoryCell.create(64, GameLogic.RED_PLAYER, GameLogic.LIVING, [63,83,84,85,65,45,44,43]);
+    board[65] = FactoryCell.create(65, GameLogic.RED_PLAYER, GameLogic.LIVING, [64,84,85,86,66,46,45,44]);
+    
+    //change 4 to break red formation
+    const updatedHalfCell = GameLogic.updatePickedCell(board[4], GameLogic.BLUE_PLAYER, board, 20);
+    board[4].state = updatedHalfCell.state;
+    board[4].player = updatedHalfCell.player
+    
+    expect(board[4].state).toEqual(GameLogic.NEW_CELL_DYING);
+    expect(board[4].player).toEqual(GameLogic.BLUE_PLAYER);
+
+    const neighbors = GameLogic.getNeighbors(updatedHalfCell, board, 20, GameLogic.MODE_ALL_NEIGHBORS);
+    GameLogic.updatePickedNeighbors(neighbors, board, 20);
+
+    expect(board[24].state).toEqual(GameLogic.BORN);
+    expect(board[24].player).toEqual(GameLogic.RED_PLAYER);
+    
+    expect(board[25].state).toEqual(GameLogic.BORN);
+    expect(board[25].player).toEqual(GameLogic.RED_PLAYER);
+
+    //simulate two feeds to fill the half cell
+    board[4].state = GameLogic.DYING;
+
+    const updBoard = GameLogic.applyLife(board);
+
+    expect(updBoard[4].state).toEqual(GameLogic.EMPTY);
+    expect(updBoard[4].player).toEqual(GameLogic.NO_PLAYER);
+
+    expect(updBoard[24].state).toEqual(GameLogic.LIVING);
+    expect(updBoard[24].player).toEqual(GameLogic.RED_PLAYER);
+    
+    expect(updBoard[25].state).toEqual(GameLogic.LIVING);
+    expect(updBoard[25].player).toEqual(GameLogic.RED_PLAYER);
+
+    expect(updBoard[44].state).toEqual(GameLogic.DYING);
+    expect(updBoard[44].player).toEqual(GameLogic.RED_PLAYER);
+
+    expect(updBoard[45].state).toEqual(GameLogic.DYING);
+    expect(updBoard[45].player).toEqual(GameLogic.RED_PLAYER);
+
+    expect(updBoard[43].state).toEqual(GameLogic.BORN);
+    expect(updBoard[43].player).toEqual(GameLogic.RED_PLAYER);
+    
+    expect(updBoard[46].state).toEqual(GameLogic.BORN);
+    expect(updBoard[46].player).toEqual(GameLogic.RED_PLAYER);
+});
