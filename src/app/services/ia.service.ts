@@ -16,10 +16,16 @@ export class IAService {
 
   constructor(private store: Store, private actions$: Actions) {
     this.actions$.pipe(ofActionSuccessful(NextMove)).subscribe(() => {
-      this.store.dispatch(new BeginProcessing());
-      this.playIA();
-      this.store.dispatch(new EndProcessing());
+      this.delay(1).then(() => {
+        this.store.dispatch(new BeginProcessing());
+        this.playIA();
+        this.store.dispatch(new EndProcessing());
+      })      
     });
+  }
+
+  private async delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) ); 
   }
 
   private  playIA() {        

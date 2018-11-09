@@ -118,7 +118,7 @@ import { GameState } from './game.state';
                 //Update associated half cell
                 saveCells.push(halfCell);
                 halfCell = GameLogic.updatePickedCell(halfCell, currentPlayer, updatedBoard, board.size);
-                updatedBoard[halfCell.id].state = halfCell.state;
+                updatedBoard[halfCell.id].state = halfCell.state;                
             }
 
             //Save initial state for undo action

@@ -41,9 +41,9 @@ export class ViewerComponent implements OnInit, AfterViewInit {
     if (this.game) {
       if (changes.isRendering) {        
         if (changes.isRendering.currentValue.isMoveRendering === true) {
-          this.game.updateBoard(this.board)
+          this.game.updateBoard(this.board)          
           .then(() => this.reachedCellRendering.emit())
-          .then(() => this.game.endUpdateBoard(this.board))          
+          .then(() => this.game.endUpdateBoard(this.board))     
           .then(() => this.finishMoveRendering.emit()); 
         }
         else if (changes.isRendering.currentValue.isBoardRendering === true)  {          

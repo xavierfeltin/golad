@@ -198,20 +198,33 @@ export class GameLogic {
         //let updatedNeighbors = FactoryBoardCells.copy(neighbors);        
 
         for(let updCell of neighbors) {
-            const idCell = updCell.id;
+            const idCell = updCell.id;                        
             if (GameLogic.isCellConfortable(updCell, board, size, GameLogic.MODE_PICKING)) {
+
                 if (updCell.state == GameLogic.EMPTY) {
                     board[idCell].player = GameLogic.defineBornCellPlayer(updCell, board, size);
-                    board[idCell].state = GameLogic.BORN;
+                    board[idCell].state = GameLogic.BORN;                    
                 }
                 else if (GameLogic.isLivingCell(updCell)) {
                     board[idCell].state = GameLogic.LIVING;
+                }
+                else if (GameLogic.isNewCell(updCell)) {
+                    board[idCell].state = GameLogic.NEW_CELL;
+                }
+                else if (GameLogic.isHalfCell(updCell)) {
+                    board[idCell].state = GameLogic.HALF_CELL;
                 }
                 //else cell is in born state, should not happening 
             }  
             else {
                 if(GameLogic.isLivingCell(updCell)) {
                     board[idCell].state = GameLogic.DYING;
+                }
+                else if (GameLogic.isNewCell(updCell)) {
+                    board[idCell].state = GameLogic.NEW_CELL_DYING;
+                }
+                else if (GameLogic.isHalfCell(updCell)) {
+                    board[idCell].state = GameLogic.HALF_CELL_DYING;
                 }
                 else {
                     board[idCell].player = GameLogic.NO_PLAYER;

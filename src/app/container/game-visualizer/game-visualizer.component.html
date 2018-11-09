@@ -2,9 +2,9 @@
     <app-players-info class="one" [players]="players$ | async"></app-players-info>
     <div class="game-area two">
         <app-viewer (pickObject)="onPick($event)" 
-            (finishMoveRendering)="onFinishMoveRendering($event)"
-            (finishBoardRendering)="onFinishBoardRendering($event)"
-            (reachedCellRendering)="onReachedCellRendering($event)"
+            (finishMoveRendering)="onFinishMoveRendering()"
+            (finishBoardRendering)="onFinishBoardRendering()"
+            (reachedCellRendering)="onReachedCellRendering()"
             [size]="size$ | async" 
             [board]="board$ | async"
             [isRendering]="isRendering$ | async"></app-viewer>

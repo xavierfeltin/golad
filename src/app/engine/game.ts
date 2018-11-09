@@ -37,6 +37,9 @@ export class Game {
     public static HALF_BLUE_CELL_DYING: number = 12;
     public static HALF_RED_CELL: number = 13;
     public static HALF_RED_CELL_DYING: number = 14;
+
+    public static INIT_BLUE_POSITION = new BABYLON.Vector3(150.0, 10.0, -199.0);
+    public static INIT_RED_POSITION =  new BABYLON.Vector3(50.0, 10.0, -199.0);
     
     CELL_SIZE = 10.0;
     BOARD_SIZE = 20; //replace later with player board selection
@@ -74,9 +77,20 @@ export class Game {
         this.configureCamera();
         this.displayBoardMultiMap();
         
-        //this.updateBoard(board);       
-        const meshBoard = this.scene.getMeshByName('board');
-        this.updateCellsRendering(board.cells, meshBoard);
+        //const meshBoard = this.scene.getMeshByName('board');
+        //this.updateCellsRendering(board.cells, meshBoard);
+
+        //Note: when transitionMaterials animation is called the first time, the 
+        //animation does not play. It is called here the first time when initiating the board
+        //to be sure it will work normally during the game.
+        let meshBoard = this.scene.getMeshByName('board');
+        let copyMeshBoard = meshBoard.clone('copyBoard', meshBoard.parent, true);
+        copyMeshBoard.position.y = 9;        
+        this.updateCellsRendering(board.cells, copyMeshBoard);
+        await this.transitionMaterials(meshBoard);
+        copyMeshBoard.position.y = 10;
+        this.scene.removeMesh(meshBoard, true);
+        copyMeshBoard.name='board';
     }
 
     resetBoard() {
@@ -92,8 +106,7 @@ export class Game {
     createPicker() {
         this.picker = BABYLON.MeshBuilder.CreateSphere("picker", {diameter: 2, diameterX: 3}, this.scene);
         this.picker.position = new BABYLON.Vector3(100.0, 10.0, -199.0);
-        this.picker.isVisible = true;
-
+        this.picker.isVisible = false;
         let whiteMat = new BABYLON.StandardMaterial("whiteMat", this.scene);
 	    whiteMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
         this.picker.material = whiteMat;
@@ -161,8 +174,6 @@ export class Game {
     }
 
     async updateBoard(board: BoardStateModel) {
-        const initBluePos = new BABYLON.Vector3(150.0, 10.0, -190.0);
-        const initRedPos =  new BABYLON.Vector3(50.0, 10.0, -190.0);
         let target = BABYLON.Vector3.Zero();
         let initialPos = BABYLON.Vector3.Zero();
 
@@ -170,7 +181,7 @@ export class Game {
             const player = board.lastMove.player;            
 
             if (!player.human) {                              
-                initialPos = player.name == 'Blue' ? initBluePos : initRedPos;
+                initialPos = player.name == 'Blue' ? Game.INIT_BLUE_POSITION : Game.INIT_RED_POSITION;
 
                 //Reset picker position when changing player
                 if (this.lastPlayerRendered !== player.name) {                    
@@ -191,45 +202,43 @@ export class Game {
             else {
                 this.setPickerVisibility(false);            
             }
-        }
-       
-        /* => moved to endUpdateBoard
-        this.updateCellsRendering(board.cells, meshBoard);
-
-        if (board.lastMove != null) {
-            const player = board.lastMove.player;
-            
-            if (!player.human && board.lastMove.remainingActions == 0) {                
-                await this.movePickerMesh(target, initialPos);
-            }            
-
-            this.lastPlayerRendered = board.lastMove.player.name;
-        }          
-        */      
+        }     
     }
 
     async endUpdateBoard(board: BoardStateModel) {
-        const meshBoard = this.scene.getMeshByName('board');
-        const initBluePos = new BABYLON.Vector3(150.0, 10.0, -190.0);
-        const initRedPos =  new BABYLON.Vector3(50.0, 10.0, -190.0);
+        let meshBoard = this.scene.getMeshByName('board');
         let target = BABYLON.Vector3.Zero();        
-
-        this.updateCellsRendering(board.cells, meshBoard);
-
+                  
+        //Apply transition animation when applying life
+        //No transition when player is picking a cell
+        if (board.lastMove == null) {
+            let copyMeshBoard = meshBoard.clone('copyBoard', meshBoard.parent, true);
+            copyMeshBoard.position.y = 9;        
+            this.updateCellsRendering(board.cells, copyMeshBoard);
+            await this.transitionMaterials(meshBoard);            
+            copyMeshBoard.position.y = 10;            
+            this.scene.removeMesh(meshBoard, true);
+            copyMeshBoard.name = 'board';        
+        }
+        else {
+            this.updateCellsRendering(board.cells, meshBoard);
+        }
+                
         if (board.lastMove != null) {
             const player = board.lastMove.player;            
 
             if (!player.human) {                             
                 if (board.lastMove.remainingActions == 0) {           
                     //Move picker from current position to target
-                    target = player.name == 'Blue' ? initBluePos : initRedPos;
-                    await this.movePickerMesh(this.getPicker().position, target);                                    
+                    target = player.name == 'Blue' ? Game.INIT_BLUE_POSITION : Game.INIT_RED_POSITION;
+                    await this.movePickerMesh(this.getPicker().position, target);      
+                    this.setPickerVisibility(false);                                
                 }                
             }
             this.lastPlayerRendered = board.lastMove.player.name;
-        } 
+        }                 
     }
-
+    
     updateCellsRendering(cells: Cell[], meshBoard: AbstractMesh) {
         for(const cell of cells) {
             switch(cell.state) {
@@ -316,7 +325,7 @@ export class Game {
 
     setPickerVisibility(isVisible: boolean) {
         let picker = this.getPicker();
-        picker.isVisible = true;
+        picker.isVisible = isVisible;
     }
 
     setPickerPosition(pos: BABYLON.Vector3) {
@@ -348,6 +357,21 @@ export class Game {
         }
 
         return [state, player];
+    }
+
+    transitionMaterials(board: AbstractMesh): Promise<any> {        
+        return Promise.all([
+            BABYLON.Animation.CreateAndStartAnimation(
+                'disappearBoard', // anim name
+                board, // animated mesh
+                'visibility', // animated property
+                100, // speed
+                50, // total frames
+                1.0, // starting value
+                0.0, // target value
+                0  // cycle mode
+            ).waitAsync()
+        ]);                
     }
 
     run(): void {
