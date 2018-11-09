@@ -10,6 +10,7 @@
   - Realizing a new project with Angular and Typescript
   - Discovering state management architecture (using NGXS)
   - Developping some bots to challenge players
+  - Integrating a WebGL component
   
 **The technologies used in this project**:
   - Angular 6 (https://angular.io/)
