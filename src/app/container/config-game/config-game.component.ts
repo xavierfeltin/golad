@@ -57,7 +57,7 @@ export class ConfigGameComponent implements OnInit {
 
   onSubmit($event) {
     if($event.newGame) {
-      this.createGame($event.blue, $event.red, $event.blue_player, $event.red_player);
+      this.createGame($event.blue, $event.red, $event.blue_player, $event.red_player, $event.board_configuration);
     }    
     else {
       this.stopGame();
@@ -73,7 +73,7 @@ export class ConfigGameComponent implements OnInit {
     }    
   }
 
-  createGame(blueName: string, redName: string, bluePlayer: string, redPlayer: string) {
+  createGame(blueName: string, redName: string, bluePlayer: string, redPlayer: string, configuration: string) {
     this.store.dispatch(new TurnReset());    
     this.store.dispatch(new PlayerReset());
     this.store.dispatch(new BoardReset());
@@ -82,7 +82,7 @@ export class ConfigGameComponent implements OnInit {
 
     this.store.dispatch(new SetPlayer(GameLogic.BLUE_PLAYER, blueName, bluePlayer));
     this.store.dispatch(new SetPlayer(GameLogic.RED_PLAYER, redName, redPlayer));
-    this.store.dispatch(new CreateBoard(20));
+    this.store.dispatch(new CreateBoard(configuration, 20));
     this.store.dispatch(new StartGame());
   }  
 }

@@ -16,6 +16,12 @@
     A name should have at least one character
   </div>
 
+  <label> Configuration: </label>
+  <select id="board_configuration" name="board_configuration" class="form-component" size="1" formControlName="board_configuration">
+    <option [value]="configRandom" [selected]="true">Random</option>
+    <option [value]="configSquares" [selected]="false">Squares</option>
+  </select>
+
   <button class="validation-button" type="submit" [disabled]="!formConfig.valid || (!game.isGameOnGoing && game.isStoppingGame == 1)" > 
     <ng-container *ngIf="!game.isGameOnGoing; else stopGame"> New Game </ng-container>  
   </button> 

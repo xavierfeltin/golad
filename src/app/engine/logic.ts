@@ -26,6 +26,9 @@ export class GameLogic {
     public static HUMAN = 'human';
     public static IA = 'ia';
 
+    public static CONFIG_RANDOM = 'random';
+    public static CONFIG_SQUARES = 'squares';
+
     //PUBLIC LOGIC FUNCTIONS
     public static isLivingCell(cell: Cell): boolean {
         return (cell.state == GameLogic.LIVING) || (cell.state == GameLogic.DYING); 
@@ -252,8 +255,8 @@ export class GameLogic {
         return row + column * boardSize ;
     }
 
-    //Generate a static board for test purposes
-    public static getDefaultBoard(): Cell[] {
+    //Generate a static board in shape of 4 squares
+    public static getSquaresBoard(): Cell[] {
         const boardSize = 20 * 20;
         let cells = [];
         for (let i = 0; i < boardSize; i++) {
@@ -266,13 +269,29 @@ export class GameLogic {
             cells.push(cell);  
         }
 
-        //const blueIdCells = [42, 43, 62, 63, 322, 323, 342, 343];
-        let blueIdCells = [42, 43, 44, 45, 46, 66, 86, 106, 126, 125, 124, 123, 122, 102, 82, 62];
-        blueIdCells = blueIdCells.concat([262, 263, 264, 265, 266, 286, 306, 326, 346, 345, 344, 343, 342, 322, 302, 282]);
+        const squares = [
+            [42, 43, 44, 45, 46, 66, 86, 106, 126, 125, 124, 123, 122, 102, 82, 62],
+            [262, 263, 264, 265, 266, 286, 306, 326, 346, 345, 344, 343, 342, 322, 302, 282],
+            [53, 54, 55, 56, 57, 77, 97, 117, 137, 136, 135, 134, 133, 113, 93, 73],
+            [273, 274, 275, 276, 277, 297, 317, 337, 357, 356, 355, 354, 353, 333, 313, 293]
+        ];
 
-        let redIdCells = [53, 54, 55, 56, 57, 77, 97, 117, 137, 136, 135, 134, 133, 113, 93, 73];
-        redIdCells = redIdCells.concat([273, 274, 275, 276, 277, 297, 317, 337, 357, 356, 355, 354, 353, 333, 313, 293]);
-        
+        let squareIds = [0,1,2,3];
+        let blueIdCells = [];
+        let redIdCells = [];
+        let i = 0;
+        while(squareIds.length > 0) {
+            const id = Math.floor(Math.random() * squareIds.length);
+            if(i%2 == 0) {
+                blueIdCells = blueIdCells.concat(squares[squareIds[id]]);
+            }
+            else {
+                redIdCells = redIdCells.concat(squares[squareIds[id]]);
+            }            
+            squareIds = squareIds.filter(square => square != squareIds[id]);
+            i++;
+        }
+
         for(const id of blueIdCells) {
             cells[id].state = GameLogic.LIVING;
             cells[id].player = GameLogic.BLUE_PLAYER;

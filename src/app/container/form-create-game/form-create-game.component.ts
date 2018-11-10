@@ -19,6 +19,8 @@ export class FormCreateGameComponent implements OnInit, OnChanges {
   
   public labelHuman: string = GameLogic.HUMAN;
   public labelIA: string = GameLogic.IA;
+  public configRandom: string = GameLogic.CONFIG_RANDOM;
+  public configSquares: string = GameLogic.CONFIG_SQUARES;
 
   formConfig: FormGroup;  
   constructor(private fb: FormBuilder) { }
@@ -35,6 +37,7 @@ export class FormCreateGameComponent implements OnInit, OnChanges {
       ]],        
       red_player: [GameLogic.HUMAN, []],              
       blue_player: [GameLogic.HUMAN, []],
+      board_configuration: [GameLogic.CONFIG_RANDOM, []]
     }); 
   }
 
@@ -53,12 +56,28 @@ export class FormCreateGameComponent implements OnInit, OnChanges {
     const bluePlayer = form.value.blue_player;
     const redName = form.value.red_name;      
     const redPlayer = form.value.red_player;  
+    const configuration = form.value.board_configuration;
+ 
+    let formValues = {
+      'newGame': false, 
+      'blue': blueName, 
+      'red': redName, 
+      'blue_player': bluePlayer, 
+      'red_player': redPlayer, 
+      'board_configuration': configuration
+    };
+
+    formValues['newGame'] = !this.game.isGameOnGoing;
+    this.submitConfig.emit(formValues);
     
-    if (this.game.isGameOnGoing) {      
-      this.submitConfig.emit({'newGame': false, 'blue': blueName, 'red': redName, 'blue_player': bluePlayer, 'red_player': redPlayer});
+    /*
+    if (this.game.isGameOnGoing) {
+            
+      this.submitConfig.emit({'newGame': false, 'blue': blueName, 'red': redName, 'blue_player': bluePlayer, 'red_player': redPlayer, 'board_configuration': configuration});
     }            
     else {
-      this.submitConfig.emit({'newGame': true, 'blue': blueName, 'red': redName, 'blue_player': bluePlayer, 'red_player': redPlayer});
+      this.submitConfig.emit({'newGame': true, 'blue': blueName, 'red': redName, 'blue_player': bluePlayer, 'red_player': redPlayer, 'board_configuration': configuration});
     }
+    */
   }
 }

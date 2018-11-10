@@ -2,7 +2,7 @@ import { Cell } from '../models/cell.model';
 
 export class CreateBoard {
     static readonly type = '[BOARD] Create Board';
-    constructor(public size: number) {}
+    constructor(public configuration: string, public size: number) {}
 }
 
 export class AttributeCell {

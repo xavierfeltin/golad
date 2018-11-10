@@ -15,6 +15,7 @@ import { GameState } from './game.state';
     export class BoardStateModel {
         public id: string;
         public size: number;
+        public configuration: string;
         public cells: Cell[];
         public lastMove: Move;
     }
@@ -24,6 +25,7 @@ import { GameState } from './game.state';
         defaults: {
             id: '',
             size: 0,
+            configuration: '',
             cells: [],
             lastMove: null
         }
@@ -43,12 +45,21 @@ import { GameState } from './game.state';
     }
 
     @Action(CreateBoard)
-    createBoard(ctx: StateContext<BoardStateModel>, { size }: CreateBoard) {
-        const board = GameLogic.getDefaultBoard(); //GameLogic.getRandomBoard();
+    createBoard(ctx: StateContext<BoardStateModel>, { configuration, size }: CreateBoard) {
+
+        let board = [];
+        if (configuration == GameLogic.CONFIG_RANDOM) {
+            board = GameLogic.getRandomBoard();
+        }
+        else {
+            board = GameLogic.getSquaresBoard();
+        }
+        
         
         ctx.patchState({
             id: uuid(),
             size: size,
+            configuration: configuration,
             cells: board
         });
 
@@ -137,6 +148,7 @@ import { GameState } from './game.state';
                 id: board.id,
                 size: board.size,
                 cells: updatedBoard,
+                configuration: board.configuration,
                 lastMove: FactoryMove.create(pickedCell, players[currentPlayer], remainingActions)
             });
             
@@ -189,6 +201,7 @@ import { GameState } from './game.state';
             id: board.id,
             size: board.size,
             cells: updatedBoard,
+            configuration: board.configuration,
             lastMove: null
         });
 
@@ -232,6 +245,7 @@ import { GameState } from './game.state';
         ctx.patchState({
             id: board.id,
             size: board.size,
+            configuration: board.configuration,
             cells: updatedBoard,
             lastMove: FactoryMove.copy(board.lastMove)
         });      
@@ -242,6 +256,7 @@ import { GameState } from './game.state';
         ctx.patchState({
             id: '',
             size: 0,
+            configuration: '',
             cells: [],
             lastMove: null
         });      
