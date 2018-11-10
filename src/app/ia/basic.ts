@@ -2,6 +2,7 @@ import { Cell, FactoryCell } from "../models/cell.model";
 import { GameLogic } from "../engine/logic";
 import { Player } from "../models/player.model";
 import { FactoryBoardCells } from "../models/board.model";
+import { Game } from "../engine/game";
 
 export class BasicIA {
 
@@ -59,8 +60,9 @@ export class BasicIA {
                 tmpBoard = GameLogic.applyLife(tmpBoard);
             }
             
-            const scores = GameLogic.getScore(tmpBoard);
-            solutions[cell.id] = scores[playerId] - scores[1-playerId];
+            //const scores = GameLogic.getScore(tmpBoard);
+            //solutions[cell.id] = scores[playerId] - scores[1-playerId];
+            solutions[cell.id] = BasicIA.computeCostFunction(board, tmpBoard, playerId);
         }
 
         //let maxId = -1;
@@ -80,5 +82,52 @@ export class BasicIA {
         const randomId = Math.floor(Math.random() * allSolutions.length);
         return board[allSolutions[randomId]];
         //return board[maxId];        
+    }
+
+    static computeCostFunction(prevBoard: Cell[], board: Cell[], player: number): number {
+        let costFunction = 0;
+        let playerScore = 0;
+        let opponentScore = 0;
+        let opponentDyingCell = 0;
+        let opponentBornCell = 0;
+
+        for(const cell of board) {
+            const prevCell = prevBoard[cell.id];
+            if (GameLogic.isLivingCell(prevCell) && cell.state == GameLogic.EMPTY) {
+                costFunction += (cell.player == player) ? 0 : 6;
+            }
+            else if(cell.state == GameLogic.DYING) {
+                costFunction += (cell.player == player) ? -4 : 6;
+            }
+            else if(cell.state == GameLogic.BORN) {
+                costFunction += (cell.player == player) ? 1 : -1;
+            }
+            else if(GameLogic.isHalfCell(cell) || GameLogic.isNewCell(cell)) {
+                costFunction += 1; //only player can have half cells
+            }
+            else if (prevCell.state == GameLogic.EMPTY && cell.state == GameLogic.LIVING) {
+                costFunction += 2; //player has created a new cell
+            }
+            else if (prevCell.state == GameLogic.EMPTY && cell.state == GameLogic.DYING) {
+                costFunction += 1; //player has created a new cell
+            }
+
+            if (cell.player == (1-player) && GameLogic.isLivingCell(cell)) {
+                opponentScore ++;
+                if(cell.state == GameLogic.DYING) {
+                    opponentDyingCell ++;
+                }
+                else if (cell.state == GameLogic.BORN) {
+                    opponentBornCell ++;
+                }
+            }
+            else if (cell.player == (1-player) && GameLogic.isLivingCell(cell) || GameLogic.isHalfCell(cell) || GameLogic.isNewCell(cell)) {
+                playerScore++;
+            }
+        }
+
+        costFunction += Math.min((playerScore - opponentScore), 10); //prevent difference of points to be too important for IA
+        if (opponentScore == 0 || (opponentScore == opponentDyingCell && opponentBornCell == 0)) { costFunction = Infinity;}
+        return costFunction;
     }
 }
