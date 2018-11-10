@@ -2,7 +2,6 @@ import { Cell, FactoryCell } from "../models/cell.model";
 import { GameLogic } from "../engine/logic";
 import { Player } from "../models/player.model";
 import { FactoryBoardCells } from "../models/board.model";
-import { Game } from "../engine/game";
 
 export class BasicIA {
 
@@ -35,8 +34,7 @@ export class BasicIA {
             const updCell = GameLogic.updatePickedCell(cell, playerId, tmpBoard, 20);
             tmpBoard[updCell.id].state = updCell.state;
             tmpBoard[updCell.id].player = updCell.player;
-            //tmpBoard[updCell.id].player = (updCell.state == GameLogic.EMPTY) ? GameLogic.NO_PLAYER : cell.player;
-
+            
             //const neighbors = GameLogic.getNeighbors(updCell, board, 20, GameLogic.MODE_ALL_NEIGHBORS);
             const neighbors = GameLogic.getNeighbors(updCell, tmpBoard, 20, GameLogic.MODE_ALL_NEIGHBORS);
             GameLogic.updatePickedNeighbors(neighbors, tmpBoard, 20);
@@ -60,8 +58,6 @@ export class BasicIA {
                 tmpBoard = GameLogic.applyLife(tmpBoard);
             }
             
-            //const scores = GameLogic.getScore(tmpBoard);
-            //solutions[cell.id] = scores[playerId] - scores[1-playerId];
             solutions[cell.id] = BasicIA.computeCostFunction(board, tmpBoard, playerId);
         }
 
@@ -81,7 +77,6 @@ export class BasicIA {
 
         const randomId = Math.floor(Math.random() * allSolutions.length);
         return board[allSolutions[randomId]];
-        //return board[maxId];        
     }
 
     static computeCostFunction(prevBoard: Cell[], board: Cell[], player: number): number {
