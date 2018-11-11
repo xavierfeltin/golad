@@ -295,11 +295,15 @@ export class GameLogic {
         for(const id of blueIdCells) {
             cells[id].state = GameLogic.LIVING;
             cells[id].player = GameLogic.BLUE_PLAYER;
+            let neighbors = GameLogic.getNeighbors(cells[id], cells, 20, GameLogic.MODE_ALL_NEIGHBORS);
+            GameLogic.updatePickedNeighbors(neighbors, cells, 20);
         }
 
         for(const id of redIdCells) {
             cells[id].state = GameLogic.LIVING;
             cells[id].player = GameLogic.RED_PLAYER;
+            let neighbors = GameLogic.getNeighbors(cells[id], cells, 20, GameLogic.MODE_ALL_NEIGHBORS);
+            GameLogic.updatePickedNeighbors(neighbors, cells, 20);
         }
 
         return cells;
